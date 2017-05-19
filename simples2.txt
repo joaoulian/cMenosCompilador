@@ -4,5 +4,5 @@ void main(void){
     int z;
     z = 2;
     y = 3;
-    x = ((z + y)*(z - y))/z;
+    x = (z - y)*(z+y);
 }	

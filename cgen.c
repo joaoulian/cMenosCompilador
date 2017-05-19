@@ -549,7 +549,6 @@ static void genExpression(TreeNode * tree) {
               if (p2 != NULL)
                 cGen(p2);
               if (p1 != NULL)
-
                 cGen(p1);
               elemento->nome = "asg";
               fprintf(listing, " = t%d\n", indiceT-1);
@@ -685,10 +684,24 @@ static void genExpression(TreeNode * tree) {
             if (p1 != NULL) {
               cGen(p1);
             }
-            else {
-              indiceT++;
-              fprintf(listing, "t%d = ", indiceT);
+            if (p2 != NULL){
+              cGen(p2);
             }
+            indiceT++;
+            fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
+            showOp(tree->attr.op);
+            fprintf(listing, "t%d", indiceT-2);
+            indiceT++;
+            elemento->temp = indiceT-1;
+            elemento->op1Flag = 3;
+            elemento->op1Num = indiceT-2;
+            elemento->op2Num = indiceT-3;
+            elemento->op2Flag = 3;
+            insereFila(f, *elemento);
+            elemento->op1Flag = -1;
+            elemento->op2Flag = -1;
+            elemento->temp = 0;
+            fprintf(listing, "\n");
           } else if (p1->kind.expression == VariavelK) {
             if (p2->kind.expression != VetorK && p1->kind.expression != CallK) {
               fprintf(listing, "t%d = ", indiceT);
