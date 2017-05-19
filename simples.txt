@@ -1,0 +1,14 @@
+int soma (int a, int b){
+    int sum;
+    sum = a + b;
+    return sum;
+}
+
+void main(void){
+	int x;
+	int y;
+    int z;
+    x = 1;
+	y = 2;
+    z = soma (x + 2, y);
+}	

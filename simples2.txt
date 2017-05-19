@@ -1,0 +1,8 @@
+void main(void){
+    int x;
+    int y;
+    int z;
+    z = 2;
+    y = 3;
+    x = ((z + y)*(z - y))/z;
+}	

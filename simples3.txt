@@ -1,0 +1,10 @@
+void main(void){
+    int x;
+    int y;
+    int a[10];
+    x = 0;
+    y = 0;
+    a[0] = 1 + 4;
+    y = a[0];
+    a[1] = a[0];
+}	
