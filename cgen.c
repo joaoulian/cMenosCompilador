@@ -315,11 +315,11 @@ static void genExpression(TreeNode * tree) {
         if (tree != NULL)
           fprintf(listing, "%s", tree->attr.name);
         if (elemento->op1Flag == -1){
-          elemento->op1Num = hash(tree->attr.name);
+          elemento->op1Num = buscaMemoria(tree->attr.name);
           elemento->op1Flag = 1;
         }
         else {
-          elemento->op2Num = hash(tree->attr.name);
+          elemento->op2Num = buscaMemoria(tree->attr.name);
           elemento->op2Flag = 1;
         }
         break;
@@ -338,7 +338,7 @@ static void genExpression(TreeNode * tree) {
              fprintf(listing, "param: ");
              elemento->nome = "par";
              elemento->op1Flag = 1;
-             elemento->op1Num = hash(other->attr.name);
+             elemento->op1Num = buscaMemoria(other->attr.name);
              elemento->op2Flag = -1;
              elemento->op2Num = 0;
              elemento->prox = NULL;
@@ -488,7 +488,7 @@ static void genExpression(TreeNode * tree) {
            fprintf(listing, "call %s, %d\n", tree->attr.name, temp);
            elemento->nome = "cal";
            elemento->op1Flag = 1;
-           elemento->op1Num = hash(tree->attr.name);
+           elemento->op1Num = buscaMemoria(tree->attr.name);
            elemento->op2Flag = 0;
            elemento->op2Num = temp;
            elemento->temp = 0;
@@ -502,7 +502,7 @@ static void genExpression(TreeNode * tree) {
            verificaCall = 0;
            elemento->nome = "cal";
            elemento->op1Flag = 1;
-           elemento->op1Num = hash(tree->attr.name);
+           elemento->op1Num = buscaMemoria(tree->attr.name);
            elemento->op2Flag = 0;
            elemento->op2Num = temp;
            elemento->temp = indiceT;
@@ -530,7 +530,7 @@ static void genExpression(TreeNode * tree) {
           else {
             fprintf(listing, "%s[", tree->attr.name);
             elemento->op1Flag = 1;
-            elemento->op1Num = hash(tree->attr.name);
+            elemento->op1Num = buscaMemoria(tree->attr.name);
             if (tree->child[0] != NULL)
               cGen(tree->child[0]);
             fprintf(listing, "]");
@@ -599,7 +599,7 @@ static void genExpression(TreeNode * tree) {
             fprintf(listing, "t%d", indiceT);
             elemento->nome = "cal";
             elemento->op1Flag = 1;
-            elemento->op1Num = hash(p2->attr.name);
+            elemento->op1Num = buscaMemoria(p2->attr.name);
             elemento->op2Flag = 0;
             elemento->op2Num = temp;
             elemento->temp = indiceT;

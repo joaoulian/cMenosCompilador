@@ -133,20 +133,33 @@ TipType st_lookupTipoId ( char * name )
     else return l->tipoId;
 }
 
-/* Procedure printSymTab prints a formatted
- * listing of the symbol table contents
- * to the listing file
- */
+int buscaMemoria(char *name){
+  int i;
+  for (i = 0; i < SIZE; i++){
+    if (hashTable[i] != NULL){
+      BucketList l = hashTable[i];
+      while (l != NULL){
+        if (strcmp(name,l->name2) == 0){
+          return l->memloc;
+        }
+        l = l->next;
+      }
+    }
+  }
+  return -1;
+}
+
 void printSymTab(FILE * listing)
 { int i;
-    fprintf(listing," Nome     Tipo     Declaração   Escopo      Numero linha\n");
-    fprintf(listing,"-------  -------   ---------  ----------   --------------\n");
+    fprintf(listing," Nome   Memoria  Tipo     Declaração     Escopo      Numero linha\n");
+    fprintf(listing,"------- ------- -------   ---------    ----------   --------------\n");
     for (i=0; i<SIZE; ++i)
     {if (hashTable[i] != NULL)
         { BucketList l = hashTable[i];
             while (l != NULL)
             {   LineList t = l->lines;
-                fprintf(listing,"%-10s ",l->name2);
+                fprintf(listing,"%-8s ",l->name2);
+                fprintf(listing, "%3d     ",l->memloc);
                 if(l->tipo==Integer)
                 {
                     fprintf(listing,"INT      ");
@@ -171,7 +184,7 @@ void printSymTab(FILE * listing)
                 {
                     fprintf(listing,"Vetor     ");
                 }
-                fprintf(listing,"   %-10s ",l->escopo);
+                fprintf(listing,"     %-10s ",l->escopo);
                 while (t != NULL)
                 {
                     fprintf(listing,"%4d ",t->lineno);
