@@ -4,29 +4,10 @@
 #include "symtab.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "interToMachine.h"
 
 static void cGen(TreeNode * tree);
 
-//[INICIO] Estrutura da quádrupla
-typedef struct cel {
-  char * nome;
-  int op1Num;
-  int op1Flag; //0->constante; 1->hash; 2->label; 3->temporario
-  int op2Num;
-  int op2Flag; //0->constante; 1->hash; 2->label; 3->temporario
-  int temp;
-  struct cel *prox;
-} cel;
-//[FIM] Estrutura da quádrupla
-
-//[INICIO] Estrutura da fila de quádruplas
-typedef struct fila {
-  cel * inicio;
-  cel * fim;
-} fila;
-//[FIM] Estrutura da fila de quádruplas
-
-fila *f;
 cel *elemento;
 
 int indicadorLinha = 0;
@@ -944,5 +925,6 @@ void codeGen(TreeNode * syntaxTree, char * codefile) {
   cGen(syntaxTree);
   fprintf(listing, "\n\n");
   imprimeFila(f);
+  percorreLista();
 }
 //[FIM] Função que inicia a geração de código intermediário através da áŕvore sintática

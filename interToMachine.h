@@ -1,0 +1,3 @@
+void percorreLista();
+
+void converteParaMaquina();

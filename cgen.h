@@ -16,4 +16,25 @@
  */
 void codeGen(TreeNode * syntaxTree, char * codefile);
 
+//[INICIO] Estrutura da quádrupla
+typedef struct cel {
+  char * nome;
+  int op1Num;
+  int op1Flag; //0->constante; 1->hash; 2->label; 3->temporario
+  int op2Num;
+  int op2Flag; //0->constante; 1->hash; 2->label; 3->temporario
+  int temp;
+  struct cel *prox;
+} cel;
+//[FIM] Estrutura da quádrupla
+
+//[INICIO] Estrutura da fila de quádruplas
+typedef struct fila {
+  cel * inicio;
+  cel * fim;
+} fila;
+//[FIM] Estrutura da fila de quádruplas
+
+fila *f;
+
 #endif
