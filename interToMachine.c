@@ -7,6 +7,7 @@
 
 int reg;
 int posTemporario1;
+int contLinha;
 
 typedef struct funCel {
   char * nome;
@@ -45,6 +46,7 @@ funCel *funcao;
 void percorreLista(){
   inicializaFilaFun(fun);
   cel *temp;
+  contLinha = 0;
   funcao = malloc(sizeof(funCel));
   funcao->prox = NULL;
   reg = 0;
@@ -65,17 +67,17 @@ void percorreLista(){
 
 void converteParaMaquina(cel *temp){
   if (strcmp(temp->nome,"lab") == 0){
-    if (f->fim == NULL){
+    if (fun->fim == NULL){
       strcpy(funcao->nome, temp->nome);
-      funcao->posicaoInicio = temp->op1Num;
+      funcao->posicaoInicio = 0;
       funcao->prox = NULL;
       funcao->posicaoFim = 0;
       insereFilaFun(fun, *funcao);
     }
     else {
-      fun->fim->posicaoFim = temp->op1Num-1;
+      fun->fim->posicaoFim = contLinha;
       strcpy(funcao->nome, temp->nome);
-      funcao->posicaoInicio = temp->op1Num;
+      funcao->posicaoInicio = contLinha+1;;
       funcao->prox = NULL;
       insereFilaFun(fun, *funcao);
     }
@@ -86,13 +88,16 @@ void converteParaMaquina(cel *temp){
     if (temp->op2Flag == 0){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
       fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+      contLinha = contLinha + 2;
     }
     else if (temp->op2Flag == 1){
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
       fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+      contLinha = contLinha + 2;
     }
     else if (temp->op2Flag == 3){
       fprintf(listing, "sw $s%d, %d\n", posTemporario1, temp->op1Num);
+      contLinha++;
     }
   }
   else if ((strcmp(temp->nome, "sum") == 0)
@@ -106,6 +111,7 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
       reg++;
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
+      contLinha = contLinha + 3;
       if (temp->temp > 0){
         reg++;
         if (posTemporario1 == 3){
@@ -115,6 +121,7 @@ void converteParaMaquina(cel *temp){
           posTemporario1 = reg;
         }
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg-1);
+        contLinha++;
       }
     }
     else if (temp->op1Flag == 0 && temp->op2Flag  == 1){
@@ -123,6 +130,7 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
       reg++;
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
+      contLinha = contLinha + 3;
       if (temp->temp > 0){
         reg++;
         if (posTemporario1 == 3){
@@ -132,6 +140,7 @@ void converteParaMaquina(cel *temp){
           posTemporario1 = reg;
         }
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg-1);
+        contLinha++;
       }
     }
     else if (temp->op1Flag == 1 && temp->op2Flag  == 0){
@@ -140,6 +149,7 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
       reg++;
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
+      contLinha = contLinha + 3;
       if (temp->temp > 0){
         reg++;
         if (posTemporario1 == 3){
@@ -149,6 +159,7 @@ void converteParaMaquina(cel *temp){
           posTemporario1 = reg;
         }
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg-1);
+        contLinha++;
       }
     }
     else if (temp->op1Flag == 1 && temp->op2Flag == 1){
@@ -157,6 +168,7 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
       reg++;
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
+      contLinha = contLinha + 3;
       if (temp->temp > 0){
         reg++;
         if (posTemporario1 == 3){
@@ -166,10 +178,12 @@ void converteParaMaquina(cel *temp){
           posTemporario1 = reg;
         }
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg-1);
+        contLinha++;
       }
     }
     else if (temp->op1Flag == 3 && temp->op2Flag == 3){
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, posTemporario1, posTemporario1-1);
+      contLinha++;
       posTemporario1 = 0;
     }
   }
