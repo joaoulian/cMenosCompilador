@@ -12,12 +12,12 @@ typedef struct funCel {
   char * nome;
   int posicaoInicio;
   int posicaoFim;
-  struct cel *prox;
+  struct funCel *prox;
 } funCel;
 
 typedef struct funFila {
-  cel * inicio;
-  cel * fim;
+  funCel * inicio;
+  funCel * fim;
 } funFila;
 
 void inicializaFilaFun(funFila *f) {
@@ -27,7 +27,7 @@ void inicializaFilaFun(funFila *f) {
 
 void insereFilaFun(funFila *f, funCel c) {
   cel *novo;
-  novo = malloc(sizeof(cel));
+  novo = malloc(sizeof(funCel));
   *novo = c;
   if (f->fim == NULL){
     f->fim = novo;
@@ -39,12 +39,14 @@ void insereFilaFun(funFila *f, funCel c) {
   }
 }
 
-funFila *f;
+funFila *fun;
 funCel *funcao;
 
 void percorreLista(){
-  inicializaFilaFun(f);
+  inicializaFilaFun(fun);
   cel *temp;
+  funcao = malloc(sizeof(funCel));
+  funcao->prox = NULL;
   reg = 0;
   fprintf(listing, "\n");
   posTemporario1 = 0;
@@ -68,14 +70,14 @@ void converteParaMaquina(cel *temp){
       funcao->posicaoInicio = temp->op1Num;
       funcao->prox = NULL;
       funcao->posicaoFim = 0;
-      insereFilaFun(f, funcao);
+      insereFilaFun(fun, *funcao);
     }
     else {
-      f->fim->posicaoFim = temp->op1Num-1;
+      fun->fim->posicaoFim = temp->op1Num-1;
       strcpy(funcao->nome, temp->nome);
       funcao->posicaoInicio = temp->op1Num;
       funcao->prox = NULL;
-      insereFilaFun(f, funcao);
+      insereFilaFun(fun, *funcao);
     }
   }
   else if (strcmp(temp->nome,"asg") == 0){
