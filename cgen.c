@@ -212,7 +212,7 @@ static void genDecli(TreeNode * tree) {
         fprintf(listing,  "\n%s:\n", tree->attr.name);
         elemento->nome = "lab";
         elemento->op1Flag = 1;
-        elemento->op1Num = hash(tree->attr.name);
+        elemento->op1Num = buscaMemoria(tree->attr.name);
         elemento->op2Flag = -1;
         elemento->op2Num = 0;
         elemento->temp = 0;
@@ -225,7 +225,6 @@ static void genDecli(TreeNode * tree) {
       if (tree->child[1] != NULL)
         cGen(tree->child[1]);
       break;
-
     default:
       break;
 
@@ -680,30 +679,50 @@ static void genExpression(TreeNode * tree) {
             elemento->temp = 0;
             fprintf(listing, "\n");
           }
-          if (p1->kind.expression != VariavelK && p1->kind.expression != VetorK && p1->kind.expression != CallK && p1->kind.expression != ConstK) {
-            if (p1 != NULL) {
-              cGen(p1);
+          if (p1->kind.expression == OpK) {
+            if (p2->kind.expression == OpK){
+              if (p1 != NULL) {
+                cGen(p1);
+              }
+              if (p2 != NULL){
+                cGen(p2);
+              }
+              fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
+              showOp(tree->attr.op);
+              fprintf(listing, "t%d", indiceT-2);
+              indiceT++;
+              elemento->temp = indiceT-1;
+              elemento->op1Flag = 3;
+              elemento->op1Num = indiceT-2;
+              elemento->op2Num = indiceT-3;
+              elemento->op2Flag = 3;
+              insereFila(f, *elemento);
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+              elemento->temp = 0;
+              fprintf(listing, "\n");
             }
-            if (p2 != NULL){
-              cGen(p2);
+            else if (p2->kind.expression == ConstK || p2->kind.expression == VariavelK){
+              if (p1 != NULL) {
+                cGen(p1);
+              }
+              fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
+              showOp(tree->attr.op);
+              if (p2 != NULL){
+                cGen(p2);
+              }
+              indiceT++;
+              elemento->temp = indiceT-1;
+              elemento->op1Flag = 3;
+              elemento->op1Num = indiceT-2;
+              insereFila(f, *elemento);
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+              elemento->temp = 0;
+              fprintf(listing, "\n");
             }
-            indiceT++;
-            fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
-            showOp(tree->attr.op);
-            fprintf(listing, "t%d", indiceT-2);
-            indiceT++;
-            elemento->temp = indiceT-1;
-            elemento->op1Flag = 3;
-            elemento->op1Num = indiceT-2;
-            elemento->op2Num = indiceT-3;
-            elemento->op2Flag = 3;
-            insereFila(f, *elemento);
-            elemento->op1Flag = -1;
-            elemento->op2Flag = -1;
-            elemento->temp = 0;
-            fprintf(listing, "\n");
           } else if (p1->kind.expression == VariavelK) {
-            if (p2->kind.expression != VetorK && p1->kind.expression != CallK) {
+            if (p2->kind.expression != VetorK && p2->kind.expression != CallK && p2->kind.expression != OpK) {
               fprintf(listing, "t%d = ", indiceT);
               elemento->temp = indiceT;
               indiceT++;
@@ -715,6 +734,28 @@ static void genExpression(TreeNode * tree) {
                 cGen(p2);
               }
               elemento->prox = NULL;
+              insereFila(f, *elemento);
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+              elemento->temp = 0;
+              fprintf(listing, "\n");
+            }
+            else if (p2->kind.expression == OpK){
+              if (p2 != NULL){
+                cGen(p2);
+              }
+              fprintf(listing, "t%d = ", indiceT);
+              elemento->temp = indiceT;
+              if (p1 != NULL){
+                cGen(p1);
+              }
+              showOp(tree->attr.op);
+              fprintf(listing, "t%d", indiceT-1);
+              elemento->prox = NULL;
+              elemento->temp = indiceT;
+              elemento->op2Flag = 3;
+              elemento->op2Num = indiceT-1;
+              indiceT++;
               insereFila(f, *elemento);
               elemento->op1Flag = -1;
               elemento->op2Flag = -1;
