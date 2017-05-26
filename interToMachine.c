@@ -2,6 +2,7 @@
 #include "symtab.h"
 #include "cgen.h"
 #include "symtab.h"
+#include "interToMachine.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,25 +10,13 @@ int reg;
 int posTemporario1;
 int contLinha;
 
-typedef struct funCel {
-  char * nome;
-  int posicaoInicio;
-  int posicaoFim;
-  struct funCel *prox;
-} funCel;
-
-typedef struct funFila {
-  funCel * inicio;
-  funCel * fim;
-} funFila;
-
 void inicializaFilaFun(funFila *f) {
   f->inicio = NULL;
   f->fim = NULL;
 }
 
 void insereFilaFun(funFila *f, funCel c) {
-  cel *novo;
+  funCel *novo;
   novo = malloc(sizeof(funCel));
   *novo = c;
   if (f->fim == NULL){
@@ -40,15 +29,37 @@ void insereFilaFun(funFila *f, funCel c) {
   }
 }
 
-funFila *fun;
+void inicializaFilaParam(paramFila *f) {
+  f->inicio = NULL;
+  f->fim = NULL;
+}
+
+void insereFilaParam(paramFila *f, paramCel c) {
+  paramCel *novo;
+  novo = malloc(sizeof(paramCel));
+  *novo = c;
+  if (f->fim == NULL){
+    f->fim = novo;
+    f->inicio = novo;
+  }
+  else {
+    f->fim->prox = novo;
+    f->fim = novo;
+  }
+}
+
 funCel *funcao;
+paramCel *param;
 
 void percorreLista(){
-  inicializaFilaFun(fun);
   cel *temp;
   contLinha = 0;
+  fun = malloc(sizeof(funFila));
+  par = malloc(sizeof(paramFila));
   funcao = malloc(sizeof(funCel));
-  funcao->prox = NULL;
+  param = malloc(sizeof(paramCel));
+  inicializaFilaFun(fun);
+  inicializaFilaParam(par);
   reg = 0;
   fprintf(listing, "\n");
   posTemporario1 = 0;
@@ -68,18 +79,42 @@ void percorreLista(){
 void converteParaMaquina(cel *temp){
   if (strcmp(temp->nome,"lab") == 0){
     if (fun->fim == NULL){
-      strcpy(funcao->nome, temp->nome);
+      fprintf(listing, "\n");
+      funcao->hash = temp->op1Num;
       funcao->posicaoInicio = 0;
       funcao->prox = NULL;
       funcao->posicaoFim = 0;
-      insereFilaFun(fun, *funcao);
+      //insereFilaFun(fun, *funcao);
     }
     else {
       fun->fim->posicaoFim = contLinha;
-      strcpy(funcao->nome, temp->nome);
+      funcao->hash = temp->op1Num;
       funcao->posicaoInicio = contLinha+1;;
       funcao->prox = NULL;
-      insereFilaFun(fun, *funcao);
+      //insereFilaFun(fun, *funcao);
+    }
+  }
+  else if (strcmp(temp->nome, "par") == 0){
+    if (temp->op1Flag == 1){
+      param->tipo = 1;
+      param->valor = temp->op1Num;
+      param->prox = NULL;
+      insereFilaParam(par, *param);
+    }
+  }
+  else if (strcmp(temp->nome, "cal") == 0){
+    reg = 0;
+    int i;
+    int posParam = temp->op1Num;
+    paramCel *aux = malloc(sizeof(paramCel));
+    *aux = *par->inicio;
+    for (i = 0; i < temp->op2Num; i++){
+      if (aux->tipo == 1){
+        fprintf(listing, "lw $s%d, %d\n", reg, aux->valor);
+        posParam++;
+        fprintf(listing, "sw $s%d, %d\n", reg, posParam);
+        aux = aux->prox;
+      }
     }
   }
   else if (strcmp(temp->nome,"asg") == 0){

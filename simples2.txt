@@ -1,5 +1,6 @@
-int sum(int x, int y){
-    return x + y;
+void sum(int x, int y){
+    	int z;
+	z = x + y;
 }
 
 void main(void){
@@ -8,5 +9,5 @@ void main(void){
     int z;
     x = 3;
     y = 2;
-    z = sum(x,y);
+    sum(x,y);
 }
