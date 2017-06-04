@@ -4,6 +4,7 @@
 #include "symtab.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "interToMachine.h"
 
 static void cGen(TreeNode * tree);
@@ -213,6 +214,9 @@ static void genDecli(TreeNode * tree) {
         elemento->nome = "lab";
         elemento->op1Flag = 1;
         elemento->op1Num = buscaMemoria(tree->attr.name);
+        if (strcmp(tree->attr.name, "main") == 0){
+          posMain = elemento->op1Num;
+        }
         elemento->op2Flag = -1;
         elemento->op2Num = 0;
         elemento->temp = 0;
@@ -707,14 +711,14 @@ static void genExpression(TreeNode * tree) {
                 cGen(p1);
               }
               fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
-              showOp(tree->attr.op);
-              if (p2 != NULL){
-                cGen(p2);
-              }
               indiceT++;
               elemento->temp = indiceT-1;
               elemento->op1Flag = 3;
               elemento->op1Num = indiceT-2;
+              showOp(tree->attr.op);
+              if (p2 != NULL){
+                cGen(p2);
+              }
               insereFila(f, *elemento);
               elemento->op1Flag = -1;
               elemento->op2Flag = -1;
@@ -969,6 +973,7 @@ void verificaFlag (int flag, int number){
 void codeGen(TreeNode * syntaxTree, char * codefile) {
   char * s = malloc(strlen(codefile) + 7);
   strcpy(s, "File: ");
+  posMain = 0;
   strcat(s, codefile);
   f = malloc(sizeof(fila));
   elemento = malloc(sizeof(cel));

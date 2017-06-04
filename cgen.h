@@ -37,4 +37,6 @@ typedef struct fila {
 
 fila *f;
 
+int posMain;
+
 #endif
