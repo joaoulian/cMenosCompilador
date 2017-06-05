@@ -61,19 +61,57 @@ void insereFilaParam(paramFila *f, paramCel c) {
   }
 }
 
+ifCel * buscaFilaIfByLabel(ifFila *oi, int labelValue){
+  ifCel *temp;
+  temp = malloc(sizeof(ifCel));
+  if (oi->inicio != NULL){
+    *temp = *oi->inicio;
+  }
+  while(temp != NULL){
+    if (temp->label == labelValue){
+      return temp;
+    }
+    temp = temp->prox;
+  }
+  return NULL;
+}
+
+void inicializaFilaIf(ifFila *f) {
+  f->inicio = NULL;
+  f->fim = NULL;
+}
+
+void insereFilaIf(ifFila *f, ifCel c) {
+  ifCel *novo;
+  novo = malloc(sizeof(ifCel));
+  *novo = c;
+  if (f->fim == NULL){
+    f->fim = novo;
+    f->inicio = novo;
+  }
+  else {
+    f->fim->prox = novo;
+    f->fim = novo;
+  }
+}
+
 funCel *funcao;
 paramCel *param;
-int listaLabel[30];
+ifCel *celIf;
+int linhaLabel[30];
 
 void percorreLista(){
   cel *temp;
   contLinha = 0;
   fun = malloc(sizeof(funFila));
+  filaIf = malloc(sizeof(ifFila));
+  celIf = malloc(sizeof(ifCel));
   par = malloc(sizeof(paramFila));
   funcao = malloc(sizeof(funCel));
   param = malloc(sizeof(paramCel));
   inicializaFilaFun(fun);
   inicializaFilaParam(par);
+  inicializaFilaIf(filaIf);
   reg = 0;
   fprintf(listing, "\n");
   if (posMain > 0){
@@ -101,7 +139,13 @@ void percorreLista(){
 void converteParaMaquina(cel *temp){
   if (strcmp(temp->nome,"lab") == 0){
     if (temp->op1Flag == 2){
-      listaLabel[temp->op1Num] = contLinha;
+      linhaLabel[temp->op1Num] = contLinha;
+      ifCel *auxIf = malloc(sizeof(ifCel));
+      auxIf = buscaFilaIfByLabel(filaIf, temp->op1Num);
+      if (auxIf != NULL){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", auxIf->linhaChamada);
+        fprintf(listing, "beq $s%d, $s0, %d\n", auxIf->regResult, contLinha);
+      }
     }
     else {
       if (fun->fim == NULL){
@@ -160,6 +204,11 @@ void converteParaMaquina(cel *temp){
       contLinha++;
     }
   }
+  else if (strcmp(temp->nome, "got") == 0){
+    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+    fprintf(listing, "j %d\n", linhaLabel[temp->op1Num]);
+    contLinha++;
+  }
   else if (strcmp(temp->nome,"asg") == 0){
     if (temp->op2Flag == 0){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
@@ -212,9 +261,11 @@ void converteParaMaquina(cel *temp){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     contLinha++;
     fprintf(listing, "li $s0, 1\n");
-    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+    celIf->linhaChamada = contLinha;
+    celIf->regResult = reg;
+    celIf->label = temp->op2Num;
+    insereFilaIf(filaIf, *celIf);
     contLinha++;
-    fprintf(listing, "beq $s%d, $s0, %d\n", reg, temp->op2Num);
   }
   else if ((strcmp(temp->nome, "sum") == 0)
           || (strcmp(temp->nome, "sub") == 0)

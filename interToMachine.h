@@ -23,8 +23,21 @@ typedef struct paramFila {
   paramCel * fim;
 } paramFila;
 
+typedef struct ifCel {
+  int linhaChamada;
+  int regResult;
+  int label;
+  struct ifCel *prox;
+} ifCel;
+
+typedef struct ifFila {
+  ifCel * inicio;
+  ifCel * fim;
+} ifFila;
+
 funFila *fun;
 paramFila *par;
+ifFila *filaIf;
 
 void percorreLista();
 
