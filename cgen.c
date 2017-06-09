@@ -334,7 +334,7 @@ static void genExpression(TreeNode * tree) {
          int temp = 0;
          TreeNode * other;
          if (tree != NULL && tree->child[0] != NULL)
-           other = tree->child[0];
+          other = tree->child[0];
          while (other != NULL) {
            temp++;
            if (other->kind.expression == VariavelK) {
@@ -533,7 +533,7 @@ static void genExpression(TreeNode * tree) {
           else {
             fprintf(listing, "%s[", tree->attr.name);
             elemento->op1Flag = 1;
-            elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo);
+            elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val - 1);
             if (tree->child[0] != NULL)
               cGen(tree->child[0]);
             fprintf(listing, "]");
@@ -589,29 +589,9 @@ static void genExpression(TreeNode * tree) {
             fprintf(listing, "\n");
           }
           else if (p2->kind.expression == CallK) {
-            verificaCall = 1;
+            verificaCall = 2;
             if (p2 != NULL)
               cGen(p2);
-            int temp = 0;
-            TreeNode * other = p2->child[0];
-            while (other != NULL) {
-              temp++;
-              other = other->sibling;
-            }
-            fprintf(listing, "t%d", indiceT);
-            elemento->nome = "cal";
-            elemento->op1Flag = 1;
-            elemento->op1Num = buscaMemoriaComEscopo(p2->attr.name, p2->escopo);
-            elemento->op2Flag = 0;
-            elemento->op2Num = temp;
-            elemento->temp = indiceT;
-            elemento->prox = NULL;
-            insereFila(f, *elemento);
-            elemento->op1Flag = -1;
-            elemento->op2Flag = -1;
-            elemento->temp = 0;
-            fprintf(listing, " = ");
-            fprintf(listing, "call %s, %d\n", p2->attr.name, temp);
             if (p1 != NULL)
               cGen(p1);
             elemento->nome = "asg";
@@ -623,7 +603,7 @@ static void genExpression(TreeNode * tree) {
             elemento->temp = 0;
             elemento->op2Flag = -1;
             elemento->op1Flag = -1;
-            fprintf(listing, " = t%d", indiceT);
+            fprintf(listing, " = t%d", indiceT-1);
             indiceT++;
             fprintf(listing, "\n");
             verificaCall = 0;

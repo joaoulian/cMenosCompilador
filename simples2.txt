@@ -1,6 +1,12 @@
+int menos(int x, int y){
+    int z;
+    z = x - y;
+    return z;
+}
+
 void sum(int x, int y){
     	int z;
-	z = x + y;
+        z = menos(x, y);
 }
 
 void main(void){
