@@ -9,6 +9,9 @@
 int reg;
 int posTemporario1;
 int contLinha;
+int loadRegister = 0;
+int ultimaFuncao = -1;
+int recebeRetorno = 0;
 
 void mapeiaLabel(cel *temp);
 
@@ -67,6 +70,7 @@ funCel *funcao;
 paramCel *param;
 int linhaLabel[30];
 int linhaChamadaFuncao[200];
+int variavelRetorno[200];
 int indiceChamadaFuncao = 0;
 int indicePilha = 0;
 
@@ -82,7 +86,7 @@ void percorreLista(){
   inicializaFilaParam(par);
   reg = 0;
   fprintf(listing, "\n");
-  posTemporario1 = 2;
+  posTemporario1 = 3;
   temp = malloc(sizeof(cel));
   temp2 = malloc(sizeof(cel));
   *temp2 = *f->inicio;
@@ -121,7 +125,6 @@ void mapeiaLabel(cel *temp){
   if (strcmp(temp->nome,"lab") == 0){
     if (temp->op1Flag == 2){
       linhaLabel[temp->op1Num] = contLinha;
-      fprintf(listing, "Label: %d, Linha: %d = ", temp->op1Num, contLinha);
     }
     else {
       if (fun->fim == NULL){
@@ -134,7 +137,7 @@ void mapeiaLabel(cel *temp){
       else {
         fun->fim->posicaoFim = contLinha;
         funcao->hash = temp->op1Num;
-        contLinha++;
+        contLinha = contLinha + 2;
         funcao->posicaoInicio = contLinha;
         funcao->prox = NULL;
         insereFilaFun(fun, *funcao);
@@ -146,6 +149,7 @@ void mapeiaLabel(cel *temp){
       param->tipo = 1;
       param->valor = temp->op1Num;
       param->prox = NULL;
+      contLinha = contLinha + 2;
       insereFilaParam(par, *param);
     }
   }
@@ -154,16 +158,9 @@ void mapeiaLabel(cel *temp){
     int i;
     int hashValue;
     int posParam = temp->op1Num;
-    paramCel *aux = malloc(sizeof(paramCel));
     funCel *tempFun = malloc(sizeof(funCel));
-    *aux = *par->inicio;
-    for (i = 0; i < temp->op2Num; i++){
-      if (aux->tipo == 1){
-        contLinha = contLinha + 2;
-        aux = aux->prox;
-      }
-    }
     tempFun = buscaFilaFunByHash(fun, temp->op1Num);
+    contLinha = contLinha + 2;
     if (tempFun->hash > -1){
       linhaChamadaFuncao[indiceChamadaFuncao] = contLinha+1;
       indiceChamadaFuncao++;
@@ -195,7 +192,12 @@ void mapeiaLabel(cel *temp){
         || (temp->op1Flag == 0 && temp->op2Flag  == 1)
         || (temp->op1Flag == 1 && temp->op2Flag  == 0)
         || (temp->op1Flag == 1 && temp->op2Flag == 1)){
-      contLinha = contLinha + 3;
+      if (temp->temp > 0){
+        contLinha = contLinha + 4;
+      }
+      else {
+        contLinha = contLinha + 3;
+      }
     }
     else if (temp->op1Flag == 3 && temp->op2Flag == 3){
       contLinha++;
@@ -204,12 +206,23 @@ void mapeiaLabel(cel *temp){
 }
 
 void converteParaMaquina(cel *temp){
+  reg = 0;
   if (strcmp(temp->nome,"lab") == 0){
-    if(temp->op1Flag != 2 && temp->op1Num != 0){
-      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-      fprintf(listing, "j %d\n", linhaChamadaFuncao[indicePilha]);
-      indicePilha++;
-      contLinha++;
+    if(temp->op1Flag != 2){
+        if (ultimaFuncao == -1){
+          ultimaFuncao = temp->op1Num;
+        }
+        else {
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "lw $s32, %d\n", ultimaFuncao);
+          contLinha++;
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "jr $s32\n");
+          indicePilha++;
+          contLinha++;
+          ultimaFuncao = temp->op1Num;
+        }
+        fprintf(listing, "\n");
     }
   }
   else if (strcmp(temp->nome, "cal") == 0){
@@ -233,6 +246,12 @@ void converteParaMaquina(cel *temp){
       }
     }
     tempFun = buscaFilaFunByHash(fun, temp->op1Num);
+    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+    fprintf(listing, "li $s32, %d\n", contLinha+3);
+    contLinha++;
+    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+    fprintf(listing, "sw $s32, %d\n", temp->op1Num);
+    contLinha++;
     if (tempFun->hash > -1){
       /*fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       fprintf(listing, "li $s31, %d\n", contLinha+2);*/
@@ -240,6 +259,13 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "j %d\n", tempFun->posicaoInicio);
       contLinha++;
     }
+    if (temp->temp > 0){
+      recebeRetorno = 1;
+    }
+    else {
+      recebeRetorno = 0;
+    }
+
     inicializaFilaParam(par);
   }
   else if (strcmp(temp->nome, "par") == 0){
@@ -250,21 +276,108 @@ void converteParaMaquina(cel *temp){
       insereFilaParam(par, *param);
     }
   }
+  else if (strcmp(temp->nome, "ret") == 0){
+    if (temp->op1Flag == 1){
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      fprintf(listing, "lw $s30, %d\n", temp->op1Num);
+      contLinha++;
+    }
+    else if (temp->op1Flag == 3){
+      if (recebeRetorno == 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "move $s30, $s%d\n", posTemporario1-1);
+        contLinha++;
+      }
+    }
+    else if (temp->op1Flag == 0){
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      fprintf(listing, "li $s30, %d\n", temp->op1Num);
+      contLinha++;
+    }
+  }
   else if (strcmp(temp->nome, "got") == 0){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     fprintf(listing, "j %d\n", linhaLabel[temp->op1Num]);
     contLinha++;
   }
   else if (strcmp(temp->nome,"asg") == 0){
-    if (temp->op2Flag == 0){
+    if (temp->op1Flag == 5){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
       contLinha++;
-      fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
-      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-      contLinha++;
-      fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+      reg++;
+      if (temp->op2Flag == 1){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
+        contLinha++;
+        reg++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
+        contLinha++;
+        if (temp->tempFlag == 0){
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "sr $s%d, $s%d\n", posTemporario1, reg);
+          contLinha++;
+        }
+        else if (temp->tempFlag == 1){
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "lw $s%d, %d\n", posTemporario1, temp->temp);
+          contLinha++;
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "sr $s%d, $s%d\n", posTemporario1, reg);
+          contLinha++;
+        }
+      }
     }
-    else if (temp->op2Flag == 1){
+    else if (temp->op1Flag == 4){
+      if (temp->tempFlag == 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "sw $s%d, %d\n", posTemporario1, temp->op1Num);
+        contLinha++;
+      }
+      else if (temp->op2Flag == 4){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
+        contLinha++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+        contLinha++;
+      }
+    }
+    else if (temp->op1Flag == 3){
+      if (temp->op2Flag == 5){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+        contLinha++;
+        reg++;
+        if (temp->tempFlag == 1){
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "lw $s%d, %d\n", reg, temp->temp);
+          contLinha++;
+          reg++;
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
+          contLinha++;
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          fprintf(listing, "lr $s%d, $s%d\n", posTemporario1, reg);
+          contLinha++;
+        }
+      }
+    }
+    if (temp->op1Flag == 4 && temp->op2Flag == 3){
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      contLinha++;
+      fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
+      reg++;
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      contLinha++;
+      fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg+1, posTemporario1-1, reg-1);
+      reg++;
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      fprintf(listing, "sr $s%d, $s%d\n", loadRegister, reg);
+      contLinha++;
+    }
+    else if (temp->op1Flag == 4 && temp->op2Flag == 1 || temp->op2Flag == 4 && temp->op1Flag == 1){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
@@ -272,10 +385,48 @@ void converteParaMaquina(cel *temp){
       contLinha++;
       fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
     }
-    else if (temp->op2Flag == 3){
-      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-      contLinha++;
-      fprintf(listing, "sw $s%d, %d\n", posTemporario1, temp->op1Num);
+    else {
+      if (temp->op2Flag == 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+      }
+      else if (temp->op2Flag == 1){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+      }
+      else if (temp->op2Flag == 3){
+        if (recebeRetorno == 1){
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          contLinha++;
+          fprintf(listing, "sw $s30, %d\n", temp->op1Num);
+        }
+        else {
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          contLinha++;
+          fprintf(listing, "sw $s%d, %d\n", posTemporario1-1, temp->op1Num);
+        }
+      }
+      else if (temp->op2Flag == 4 && temp->op1Flag == 3){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+        reg++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg+1, posTemporario1-1, reg-1);
+        reg++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        fprintf(listing, "lr $s%d, $s%d\n", posTemporario1-1, reg);
+        loadRegister = posTemporario1-1;
+      }
     }
   }
   else if ((strcmp(temp->nome, "eq") == 0)){
@@ -302,6 +453,7 @@ void converteParaMaquina(cel *temp){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     contLinha++;
     fprintf(listing, "eq $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
+    posTemporario1 = reg;
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
@@ -309,8 +461,7 @@ void converteParaMaquina(cel *temp){
     fprintf(listing, "li $s0, 1\n");
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     contLinha++;
-    fprintf(listing, "LABEL: %d", temp->op2Num);
-    fprintf(listing, "beq $s%d, $s0, %d\n", reg, linhaLabel[temp->op2Num]);
+    fprintf(listing, "beq $s%d, $s0, %d\n", posTemporario1, linhaLabel[temp->op2Num]);
   }
   else if ((strcmp(temp->nome, "sum") == 0)
           || (strcmp(temp->nome, "sub") == 0)
@@ -328,11 +479,12 @@ void converteParaMaquina(cel *temp){
       reg++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
-      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, posTemporario1, reg-1, reg-2);
+      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
       if (temp->temp > 0){
-        if (posTemporario1 == 2){
-          posTemporario1 = reg + 1;
-        }
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", reg+1, reg);
+        posTemporario1 = posTemporario1+1;
       }
     }
     else if (temp->op1Flag == 0 && temp->op2Flag  == 1){
@@ -346,11 +498,12 @@ void converteParaMaquina(cel *temp){
       reg++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
-      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, posTemporario1, reg-1, reg-2);
+      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
       if (temp->temp > 0){
-        if (posTemporario1 == 2){
-          posTemporario1 = reg + 1;
-        }
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
+        posTemporario1 = posTemporario1+1;
       }
     }
     else if (temp->op1Flag == 1 && temp->op2Flag  == 0){
@@ -364,11 +517,12 @@ void converteParaMaquina(cel *temp){
       reg++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
-      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, posTemporario1, reg-1, reg-2);
+      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
       if (temp->temp > 0){
-        if (posTemporario1 == 2){
-          posTemporario1 = reg + 1;
-        }
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
+        posTemporario1 = posTemporario1+1;
       }
     }
     else if (temp->op1Flag == 1 && temp->op2Flag == 1){
@@ -382,18 +536,72 @@ void converteParaMaquina(cel *temp){
       reg++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
-      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, posTemporario1, reg-1, reg-2);
+      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
       if (temp->temp > 0){
-        if (posTemporario1 == 2){
-          posTemporario1 = reg + 1;
-        }
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
+        posTemporario1 = posTemporario1+1;
       }
     }
-    else if (temp->op1Flag == 3 && temp->op2Flag == 3){
+    else if (temp->op1Flag == 3){
+      if (temp->op2Flag == 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+        reg++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg+1, posTemporario1, reg-1);
+        if (temp->temp > 0){
+          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          contLinha++;
+          fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg+1);
+        }
+      }
+      else if (temp->op2Flag == 1 || temp->op2Flag == 4){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
+        reg++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, posTemporario1, reg-1);
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
+      }
+      else if (temp->op2Flag == 3){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, posTemporario1, posTemporario1-1);
+      }
+    }
+    else if (temp->op1Flag == 4){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
-      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, posTemporario1, posTemporario1-1);
-      posTemporario1 = 2;
+      fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
+      reg++;
+      if (temp->op2Flag == 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+        reg++;
+      }
+      else if (temp->op2Flag == 4){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
+        reg++;
+      }
+      fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      contLinha++;
+      fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
+      if (temp->temp > 0){
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        contLinha++;
+        fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
+      }
     }
   }
 }

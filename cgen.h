@@ -20,10 +20,11 @@ void codeGen(TreeNode * syntaxTree, char * codefile);
 typedef struct cel {
   char * nome;
   int op1Num;
-  int op1Flag; //0->constante; 1->hash; 2->label; 3->temporario
+  int op1Flag; //0->constante; 1->hash; 2->label; 3->temporario; 4->vetor; 5->vetor indice variavel
   int op2Num;
-  int op2Flag; //0->constante; 1->hash; 2->label; 3->temporario
+  int op2Flag; //0->constante; 1->hash; 2->label; 3->temporario; 4->vetor; 5->vetor indice variavel
   int temp;
+  int tempFlag; //0->temporario; 1->variavel; 2->constante
   struct cel *prox;
 } cel;
 //[FIM] Estrutura da quádrupla

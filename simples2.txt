@@ -1,19 +1,14 @@
-int menos(int x, int y){
-    int z;
-    z = x - y;
-    return z;
+int teste2(int b){
+    return b + b;
 }
 
-void sum(int x, int y){
-    	int z;
-        z = menos(x, y);
+int teste1(int a){
+    int x;
+    x = teste2(a) + 2 + 1;
+    return teste2(a);
 }
 
 void main(void){
-    int x;
-    int y;
-    int z;
-    x = 3;
-    y = 2;
-    sum(x,y);
+    int a;
+    a = teste1(a);
 }

@@ -1,5 +1,6 @@
 void main(void){
-    int x[4];
     int y;
-    x[4] = 2;
+    int x[4];
+    int z;
+    x[z] = (x[2] + 2) + x[z];
 }
