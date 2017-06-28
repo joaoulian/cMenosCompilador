@@ -1,6 +1,8 @@
+void teste(int a[]){
+    a[3] = 2;
+}
+
 void main(void){
-    int y;
     int x[4];
-    int z;
-    x[z] = (x[2] + 2) + x[z];
+    teste(x);
 }

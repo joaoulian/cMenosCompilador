@@ -102,7 +102,7 @@ static void insertNode( TreeNode * t)
               st_insert_first(cat(t->attr.name,t->escopo), t->attr.name, t->lineno,location++,t->escopo, t->tipo, Vetor);
               if(t->child[0] != NULL){
                 if(t->child[0]->tipo==Integer){
-                  location = location + (t->child[0]->attr.val - 1);
+                  location = location + (t->child[0]->attr.val);
                 }
               }
             }

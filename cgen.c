@@ -625,17 +625,17 @@ static void genExpression(TreeNode * tree) {
               cGen(tree->child[0]);
             fprintf(listing, "]");
             if (elemento->op1Flag == -2){
-              elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val);
+              elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val + 1);
               elemento->op1Flag = 4;
               elemento->op2Flag = -1;
             }
             else {
               if (elemento->op1Flag == 5){
-                elemento->temp = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val);
+                elemento->temp = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val + 1);
                 elemento->tempFlag = 1;
               }
               else {
-                elemento->op2Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val);
+                elemento->op2Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo) + (tree->child[0]->attr.val + 1);
                 elemento->op2Flag = 4;
               }
             }
@@ -890,6 +890,25 @@ static void genExpression(TreeNode * tree) {
                   fprintf(listing, "\n");
                 }
               }
+              else if (p2->kind.expression == CallK){
+                if (p2 != NULL){
+                  cGen(p2);
+                }
+                fprintf(listing, "t%d = t%d", indiceT-2);
+                elemento->temp = indiceT;
+                elemento->tempFlag = 0;
+                indiceT++;
+                showOp(tree->attr.op);
+                fprintf(listing, "t%d\n", indiceT-1);
+                elemento->op1Flag = 3;
+                elemento->op1Num = indiceT-2;
+                elemento->op2Flag = 3;
+                elemento->op2Num = indiceT-1;
+                elemento->prox = NULL;
+                insereFila(f, *elemento);
+                elemento->op1Flag = -1;
+                elemento->op2Flag = -1;
+              }
               else if (p2->kind.expression == ConstK || p2->kind.expression == VariavelK){
                 fprintf(listing, "t%d = t%d", indiceT, indiceT-1);
                 elemento->temp = indiceT;
@@ -928,6 +947,26 @@ static void genExpression(TreeNode * tree) {
                 elemento->op2Flag = -1;
                 elemento->temp = 0;
                 fprintf(listing, "\n");
+              }
+              else if (p2->kind.expression == CallK){
+                if (p2 != NULL){
+                  cGen(p2);
+                }
+                fprintf(listing, "t%d =", indiceT);
+                elemento->temp = indiceT;
+                elemento->tempFlag = 0;
+                if (p1 != NULL){
+                  cGen(p1);
+                }
+                indiceT++;
+                showOp(tree->attr.op);
+                fprintf(listing, "t%d\n", indiceT-1);
+                elemento->op2Flag = 3;
+                elemento->op2Num = indiceT-1;
+                elemento->prox = NULL;
+                insereFila(f, *elemento);
+                elemento->op1Flag = -1;
+                elemento->op2Flag = -1;
               }
               else if (p2->kind.expression == VetorK){
                 if (p2->child[0]->kind.expression == VariavelK){
@@ -1060,6 +1099,25 @@ static void genExpression(TreeNode * tree) {
                 fprintf(listing, "\n");
               }
             }
+            else if (p2->kind.expression == CallK){
+              if (p2 != NULL){
+                cGen(p2);
+              }
+              fprintf(listing, "t%d = t%d", indiceT-2);
+              elemento->temp = indiceT;
+              elemento->tempFlag = 0;
+              indiceT++;
+              showOp(tree->attr.op);
+              fprintf(listing, "t%d\n", indiceT-1);
+              elemento->op1Flag = 3;
+              elemento->op1Num = indiceT-2;
+              elemento->op2Flag = 3;
+              elemento->op2Num = indiceT-1;
+              elemento->prox = NULL;
+              insereFila(f, *elemento);
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+            }
           } //[FIM] p1: OpK
           else if (p1->kind.expression == VariavelK || p1->kind.expression == ConstK) { //[INICIO] p1: VarK || ConstK
             if (p2->kind.expression != VetorK && p2->kind.expression != CallK && p2->kind.expression != OpK) {
@@ -1102,6 +1160,27 @@ static void genExpression(TreeNode * tree) {
               elemento->temp = 0;
               fprintf(listing, "\n");
             }
+            else if (p2->kind.expression == CallK){
+              if (p2 != NULL){
+                verificaCall = 2;
+                cGen(p2);
+              }
+              fprintf(listing, "t%d = ", indiceT);
+              elemento->temp = indiceT;
+              elemento->tempFlag = 0;
+              if (p1 != NULL){
+                cGen(p1);
+              }
+              showOp(tree->attr.op);
+              fprintf(listing, "t%d\n", indiceT-1);
+                            indiceT++;
+              elemento->op2Flag = 3;
+              elemento->op2Num = indiceT-1;
+              elemento->prox = NULL;
+              insereFila(f, *elemento);
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+            }
             else if (p2->kind.expression == VetorK){
               if (p2->child[0]->kind.expression == VariavelK){
                 if (p2 != NULL) {
@@ -1125,7 +1204,23 @@ static void genExpression(TreeNode * tree) {
                 fprintf(listing, "\n");
               }
               else {
-
+                fprintf(listing, "t%d = ", indiceT);
+                elemento->temp = indiceT;
+                elemento->tempFlag = 0;
+                indiceT++;
+                if (p1 != NULL) {
+                  cGen(p1);
+                }
+                showOp(tree->attr.op);
+                if (p2 != NULL){
+                  cGen(p2);
+                }
+                elemento->prox = NULL;
+                insereFila(f, *elemento);
+                elemento->op1Flag = -1;
+                elemento->op2Flag = -1;
+                elemento->temp = 0;
+                fprintf(listing, "\n");
               }
             }
           } //[FIM] p1: VarK || ConstK

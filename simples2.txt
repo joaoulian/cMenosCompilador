@@ -1,14 +1,8 @@
-int teste2(int b){
-    return b + b;
-}
-
-int teste1(int a){
-    int x;
-    x = teste2(a) + 2 + 1;
-    return teste2(a);
+void teste1(int a[]){
+    a[1] = 2;
 }
 
 void main(void){
-    int a;
-    a = teste1(a);
+    int a[4];
+    teste1(a);
 }
