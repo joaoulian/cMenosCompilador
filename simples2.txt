@@ -1,8 +1,4 @@
-void teste1(int a[]){
-    a[1] = 2;
-}
-
 void main(void){
-    int a[4];
-    teste1(a);
+    int a;
+    a = 1 + 1;
 }

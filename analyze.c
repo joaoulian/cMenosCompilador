@@ -224,6 +224,8 @@ static void insertNode( TreeNode * t)
  */
 void buildSymtab(TreeNode * syntaxTree)
 {
+    st_insert_first(cat("input","input"), "input", 0,location++,"input", Integer, Funcao);
+    st_insert_first(cat("output","output"), "output", 0,location++,"output", Void, Funcao);
     traverse(syntaxTree,insertNode,nullProc);
     if(st_lookup(cat("main","main")) == -1)
     {

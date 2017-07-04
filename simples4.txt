@@ -1,8 +1,11 @@
-void teste(int a[]){
-    a[3] = 2;
+int teste(int y[]){
+    int z;
+    y[2] = 2 + z;
+    return 1;
 }
 
 void main(void){
+    int r;
     int x[4];
-    teste(x);
+    r = teste(x);
 }

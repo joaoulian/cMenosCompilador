@@ -165,6 +165,22 @@ int buscaMemoriaComEscopo(char *name, char *escopo){
   return -1;
 }
 
+int buscaTipoComEscopo(char *name, char *escopo){
+  int i;
+  for (i = 0; i < SIZE; i++){
+    if (hashTable[i] != NULL){
+      BucketList l = hashTable[i];
+      while (l != NULL){
+        if ((strcmp(name,l->name2) == 0) && strcmp(escopo, l->escopo) == 0){
+          return l->tipoId;
+        }
+        l = l->next;
+      }
+    }
+  }
+  return -1;
+}
+
 void printSymTab(FILE * listing)
 { int i;
     fprintf(listing," Nome   Memoria  Tipo     Declaração     Escopo      Numero linha\n");
