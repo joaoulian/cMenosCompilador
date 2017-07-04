@@ -12,7 +12,7 @@ int contLinha;
 int loadRegister = 0;
 int ultimaFuncao = -1;
 int recebeRetorno = 0;
-int numVetores = -1;
+int numVetores = 0;
 
 void mapeiaLabel(cel *temp);
 
@@ -76,16 +76,16 @@ int retornoFuncao[200];
 void percorreLista(){
   cel *temp;
   cel *temp2;
-  contLinha = 0;
+  contLinha = 1;
   fun = malloc(sizeof(funFila));
   par = malloc(sizeof(paramFila));
   funcao = malloc(sizeof(funCel));
   param = malloc(sizeof(paramCel));
   inicializaFilaFun(fun);
   inicializaFilaParam(par);
-  reg = 0;
+  reg = 1;
   fprintf(listing, "\n");
-  posTemporario1 = 3;
+  posTemporario1 = 4;
   temp = malloc(sizeof(cel));
   temp2 = malloc(sizeof(cel));
   *temp2 = *f->inicio;
@@ -167,7 +167,7 @@ void mapeiaLabel(cel *temp){
     }
   }
   else if (strcmp(temp->nome, "cal") == 0){
-    reg = 0;
+    reg = 1;
     int i;
     int hashValue;
     if (temp->op1Num == 1 || temp->op1Num == 0){
@@ -194,7 +194,7 @@ void mapeiaLabel(cel *temp){
   }
   else if (strcmp(temp->nome,"asg") == 0){
     if (temp->op1Flag == 5){
-      reg = 0;
+      reg = 1;
       numVetores++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
       int aux;
@@ -279,7 +279,7 @@ void mapeiaLabel(cel *temp){
 }
 
 void converteParaMaquina(cel *temp){
-  reg = 0;
+  reg = 1;
   if (strcmp(temp->nome,"lab") == 0){
     if(temp->op1Flag != 2){
         if (ultimaFuncao == -1){
@@ -301,7 +301,7 @@ void converteParaMaquina(cel *temp){
     }
   }
   else if (strcmp(temp->nome, "cal") == 0){
-    reg = 0;
+    reg = 1;
     int i;
     int hashValue;
     if (temp->op1Num == 0){
@@ -336,6 +336,7 @@ void converteParaMaquina(cel *temp){
       converteTipoE(20, reg, 0);
       fprintf(listing, "out $s%d\n", reg);
       contLinha++;
+      inicializaFilaParam(par);
     }
     else {
       int posParam = temp->op1Num;
@@ -417,7 +418,7 @@ void converteParaMaquina(cel *temp){
     else if (temp->op1Flag == 3){
       if (recebeRetorno == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoI(22, 30, posTemporario1-1, 0);
+        converteTipoI(22, posTemporario1-1, 30, 0);
         fprintf(listing, "move $s30, $s%d\n", posTemporario1-1);
         contLinha++;
       }
@@ -572,8 +573,9 @@ void converteParaMaquina(cel *temp){
     }
     contLinha++;
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    contLinha++;
+    converteTipoR(26, reg-2, reg-1, reg);
     fprintf(listing, "eq $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
+    contLinha++;
     posTemporario1 = reg;
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
@@ -582,8 +584,9 @@ void converteParaMaquina(cel *temp){
     contLinha++;
     fprintf(listing, "li $s0, 1\n");
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    contLinha++;
+    converteTipoI(12, posTemporario1, 0, linhaLabel[temp->op2Num]);
     fprintf(listing, "beq $s%d, $s0, %d\n", posTemporario1, linhaLabel[temp->op2Num]);
+    contLinha++;
   }
   else if ((strcmp(temp->nome, "sum") == 0)
           || (strcmp(temp->nome, "sub") == 0)
@@ -602,7 +605,7 @@ void converteParaMaquina(cel *temp){
         contLinha++;
         if (temp->temp > 0){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-          converteTipoI(22, posTemporario1, reg+1, 0);
+          converteTipoI(22, reg+1, posTemporario1, 0);
           fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg+1);
           contLinha++;
         }
@@ -618,7 +621,7 @@ void converteParaMaquina(cel *temp){
         fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, posTemporario1, reg-1);
         contLinha++;
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoI(22, posTemporario1, reg, 0);
+        converteTipoI(22, reg, posTemporario1, 0);
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
         contLinha++;
       }
@@ -655,7 +658,7 @@ void converteParaMaquina(cel *temp){
       contLinha++;
       if (temp->temp > 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoI(22, posTemporario1, reg, 0);
+        converteTipoI(22, reg, posTemporario1, 0);
         fprintf(listing, "move $s%d, $s%d\n", posTemporario1, reg);
         contLinha++;
       }
@@ -694,10 +697,10 @@ void converteParaMaquina(cel *temp){
       converteTipoR(geraOpcode(temp->nome), reg-1, posTemporario1, reg+1);
       contLinha++;
       reg++;
-      posTemporario1 = 3;
+      posTemporario1 = 4;
       if (temp->temp > 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoI(22, reg+1, reg);
+        converteTipoI(22, reg, reg+1, 0);
         fprintf(listing, "move $s%d, $s%d\n", reg+1, reg);
         contLinha++;
       }
