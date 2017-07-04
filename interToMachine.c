@@ -611,8 +611,8 @@ void converteParaMaquina(cel *temp){
     else {
       if (temp->op1Flag == 0){ //const op ~
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
         contLinha++;
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
         reg++;
       }
       else if (temp->op1Flag == 1){ //var op ~
@@ -631,11 +631,6 @@ void converteParaMaquina(cel *temp){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
         contLinha++;
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
-        opcode = 23;
-        r1 = reg;
-        imediato22 = temp->op2Num;
-        converteParaBinario();
-        contLinha++;
         posTemporario1 = reg;
       }
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
@@ -656,8 +651,18 @@ void converteParaMaquina(cel *temp){
   }
 }
 
-void converteParaBinario(){
-  if (opcode == 25){
-    fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 22'd%d};\n", contLinha, opcode, r1, imediato22);
-  }
+void converteTipoR(int opcode, int r1, int r2, int r3){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+}
+void converteTipoI(int opcode, int r1, int r2, int r3){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+}
+void converteTipoJ(int opcode, int r1, int r2, int r3){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+}
+void converteTipoT(int opcode, int r1, int r2, int r3){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+}
+void converteTipoE(int opcode, int r1, int r2, int r3){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
 }
