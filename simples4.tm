@@ -1,0 +1,13 @@
+memoriaDeInstrucoes[0] = {5'd25, 5'd0, 22'd3};
+memoriaDeInstrucoes[6] = {5'd24, 5'd0, 22'd3};
+memoriaDeInstrucoes[3] = {5'd25, 5'd0, 22'd2};
+memoriaDeInstrucoes[4] = {5'd23, 5'd1, 22'd4};
+memoriaDeInstrucoes[7] = {5'd23, 5'd0, 22'd3};
+memoriaDeInstrucoes[8] = {5'd25, 5'd1, 22'd2};
+memoriaDeInstrucoes[11] = {5'd25, 5'd30, 22'd1};
+memoriaDeInstrucoes[12] = {5'd23, 5'd32, 22'd2};
+memoriaDeInstrucoes[14] = {5'd25, 5'd0, 22'd7};
+memoriaDeInstrucoes[15] = {5'd24, 5'd0, 22'd3};
+memoriaDeInstrucoes[16] = {5'd25, 5'd32, 22'd19};
+memoriaDeInstrucoes[17] = {5'd24, 5'd32, 22'd2};
+memoriaDeInstrucoes[19] = {5'd24, 5'd30, 22'd6};

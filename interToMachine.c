@@ -72,16 +72,6 @@ paramCel *param;
 int linhaLabel[30];
 int indicePilha = 0;
 int retornoFuncao[200];
-int opcode = 0;
-int r1 = 0;
-int r2 = 0;
-int r3 = 0;
-int imediato22 = 0;
-int imediato27 = 0;
-int imediato17 = 0;
-
-void converteParaBinario();
-void geraOpcode(char * nome);
 
 void percorreLista(){
   cel *temp;
@@ -205,10 +195,16 @@ void mapeiaLabel(cel *temp){
       reg = 0;
       numVetores++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
+      int aux;
+      aux = contLinha;
+      contLinha = numVetores;
+      converteTipoE(25, reg, temp->op1Num);
       fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
+      contLinha = aux;
       contLinha++;
       numVetores++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
+      converteTipoE(24, reg, temp->op1Num);
       fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
       contLinha++;
       contLinha = contLinha + 3;
@@ -279,7 +275,6 @@ void mapeiaLabel(cel *temp){
 
 void converteParaMaquina(cel *temp){
   reg = 0;
-  //fprintf(listing, "%s %d %d %d\n", temp->nome, temp->op1Flag, temp->op2Flag, temp->tempFlag);
   if (strcmp(temp->nome,"lab") == 0){
     if(temp->op1Flag != 2){
         if (ultimaFuncao == -1){
@@ -288,6 +283,7 @@ void converteParaMaquina(cel *temp){
         else {
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
           fprintf(listing, "lw $s32, %d\n", ultimaFuncao);
+          converteTipoE(23, 32, ultimaFuncao);
           contLinha++;
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
           fprintf(listing, "jr $s32\n");
@@ -314,6 +310,7 @@ void converteParaMaquina(cel *temp){
       for (i = 0; i < temp->op2Num; i++){
         if (aux->tipo == 1){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(23, reg, aux->valor);
           contLinha++;
           fprintf(listing, "lw $s%d, %d\n", reg, aux->valor);
           posParam++;
@@ -321,6 +318,7 @@ void converteParaMaquina(cel *temp){
         }
         else if (aux->tipo == 5){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(25, reg, aux->valor);
           contLinha++;
           fprintf(listing, "li $s%d, %d\n", reg, aux->valor);
           posParam++;
@@ -339,30 +337,36 @@ void converteParaMaquina(cel *temp){
       for (i = 0; i < temp->op2Num; i++){
         if (aux->tipo == 1){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(23, reg, aux->valor);
           contLinha++;
           fprintf(listing, "lw $s%d, %d\n", reg, aux->valor);
           posParam++;
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-          contLinha++;
+          converteTipoE(24, reg, posParam);
           fprintf(listing, "sw $s%d, %d\n", reg, posParam);
+          contLinha++;
           aux = aux->prox;
         }
         if (aux->tipo == 5){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(25, reg, aux->valor);
           contLinha++;
           fprintf(listing, "li $s%d, %d\n", reg, aux->valor);
           posParam++;
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-          contLinha++;
+          converteTipoE(24, reg, posParam);
           fprintf(listing, "sw $s%d, %d\n", reg, posParam);
+          contLinha++;
           aux = aux->prox;
         }
       }
       tempFun = buscaFilaFunByHash(fun, temp->op1Num);
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(25, 32, contLinha+3);
       fprintf(listing, "li $s32, %d\n", contLinha+3);
       contLinha++;
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(24, 32, temp->op1Num);
       fprintf(listing, "sw $s32, %d\n", temp->op1Num);
       contLinha++;
       if (tempFun->hash > -1){
@@ -397,6 +401,7 @@ void converteParaMaquina(cel *temp){
   else if (strcmp(temp->nome, "ret") == 0){
     if (temp->op1Flag == 1){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(23, 30, temp->op1Num);
       fprintf(listing, "lw $s30, %d\n", temp->op1Num);
       contLinha++;
     }
@@ -409,6 +414,7 @@ void converteParaMaquina(cel *temp){
     }
     else if (temp->op1Flag == 0){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(25, 30, temp->op1Num);
       fprintf(listing, "li $s30, %d\n", temp->op1Num);
       contLinha++;
     }
@@ -421,11 +427,13 @@ void converteParaMaquina(cel *temp){
   else if (strcmp(temp->nome,"asg") == 0){
     if (temp->op1Flag == 5){ // vetor recebe
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(23, reg, temp->op1Num);
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
       contLinha++;
       reg++;
       if (temp->op2Flag == 1){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op2Num);
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;
@@ -435,6 +443,7 @@ void converteParaMaquina(cel *temp){
       }
       else if (temp->op2Flag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;
@@ -455,10 +464,12 @@ void converteParaMaquina(cel *temp){
       else {
         if (temp->tempFlag == 1){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(23, posTemporario1, temp->temp);
           fprintf(listing, "lw $s%d, %d\n", posTemporario1, temp->temp);
         }
         else if (temp->tempFlag == 2){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(25, posTemporario1, temp->temp);
           fprintf(listing, "li $s%d, %d\n", posTemporario1, temp->temp);
         }
         contLinha++;
@@ -470,15 +481,18 @@ void converteParaMaquina(cel *temp){
     else if (temp->op1Flag == 3){ // temporario recebe
       if (temp->op2Flag == 5){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;
         if (temp->tempFlag == 1){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(23, reg, temp->temp);
           fprintf(listing, "lw $s%d, %d\n", reg, temp->temp);
         }
         else if (temp->tempFlag == 2){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+          converteTipoE(25, reg, temp->temp);
           fprintf(listing, "li $s%d, %d\n", reg, temp->temp);
         }
         contLinha++;
@@ -494,11 +508,13 @@ void converteParaMaquina(cel *temp){
     else if (temp->op1Flag == 1){ // variavel recebe
       if (temp->op2Flag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
       }
       else if (temp->op2Flag == 1){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op2Num);
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
       }
@@ -507,31 +523,36 @@ void converteParaMaquina(cel *temp){
         else reg = posTemporario1;
       }
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(24, reg, temp->op1Num);
       fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
       contLinha++;
     }
   }
   else if ((strcmp(temp->nome, "eq") == 0)){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    contLinha++;
     if (temp->op1Flag == 0){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
+      converteTipoE(25, reg, temp->op1Num);
       reg++;
     }
     else if (temp->op1Flag == 1){
+      converteTipoE(23, reg, temp->op1Num);
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
       reg++;
     }
-    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     contLinha++;
+    fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     if (temp->op2Flag == 0){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
+      converteTipoE(25, reg, temp->op2Num);
       reg++;
     }
     else if (temp->op2Flag == 1){
+      converteTipoE(23, reg, temp->op2Num);
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
       reg++;
     }
+    contLinha++;
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     contLinha++;
     fprintf(listing, "eq $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
@@ -539,6 +560,7 @@ void converteParaMaquina(cel *temp){
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+    converteTipoE(25, 0, 1);
     contLinha++;
     fprintf(listing, "li $s0, 1\n");
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
@@ -552,6 +574,7 @@ void converteParaMaquina(cel *temp){
     if (temp->op1Flag == 3){
       if (temp->op2Flag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         reg++;
@@ -566,6 +589,7 @@ void converteParaMaquina(cel *temp){
       }
       else if (temp->op2Flag == 1 || temp->op2Flag == 4){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         reg++;
@@ -584,17 +608,20 @@ void converteParaMaquina(cel *temp){
     }
     else if (temp->op1Flag == 4){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+      converteTipoE(23, reg, temp->op1Num);
       contLinha++;
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
       reg++;
       if (temp->op2Flag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         reg++;
       }
       else if (temp->op2Flag == 4){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         reg++;
@@ -611,24 +638,28 @@ void converteParaMaquina(cel *temp){
     else {
       if (temp->op1Flag == 0){ //const op ~
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op1Num);
         contLinha++;
         fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
         reg++;
       }
       else if (temp->op1Flag == 1){ //var op ~
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op1Num);
         contLinha++;
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
         reg++;
       }
       if (temp->op2Flag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(25, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         posTemporario1 = reg;
       }
       else if (temp->op2Flag == 1){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
+        converteTipoE(23, reg, temp->op2Num);
         contLinha++;
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         posTemporario1 = reg;
@@ -636,10 +667,6 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       contLinha++;
       fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg+1, reg-1, posTemporario1);
-      r1 = reg-1;
-      r2 = posTemporario1;
-      r3 = reg+1;
-      converteParaBinario(temp->nome);
       reg++;
       posTemporario1 = 3;
       if (temp->temp > 0){
@@ -652,17 +679,21 @@ void converteParaMaquina(cel *temp){
 }
 
 void converteTipoR(int opcode, int r1, int r2, int r3){
-  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};\n", contLinha, opcode, r1, r2, r3);
 }
-void converteTipoI(int opcode, int r1, int r2, int r3){
-  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+
+void converteTipoI(int opcode, int r1, int r2, int imediato17){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 17'd%d};\n", contLinha, opcode, r1, r2, imediato17);
 }
-void converteTipoJ(int opcode, int r1, int r2, int r3){
-  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+
+void converteTipoJ(int opcode, int imediato27){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 27'd%d};\n", contLinha, opcode, imediato27);
 }
-void converteTipoT(int opcode, int r1, int r2, int r3){
-  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+
+void converteTipoT(int opcode){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 27'dx};\n", contLinha, opcode);
 }
-void converteTipoE(int opcode, int r1, int r2, int r3){
-  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 5'd%d, 5'd%d, 12'dx};", contLinha, opcode, r1, r2, r3);
+
+void converteTipoE(int opcode, int r1, int imediato22){
+  fprintf(code, "memoriaDeInstrucoes[%d] = {5'd%d, 5'd%d, 22'd%d};\n", contLinha, opcode, r1, imediato22);
 }
