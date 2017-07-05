@@ -1,0 +1,14 @@
+void main(void){
+	int z;
+	int x;
+	int y;
+	y = 0;
+	x = input();
+	if (x >= 5){
+        y = 10;
+    }
+    else {
+        y = 5;
+    }
+    output(y);
+}

@@ -111,7 +111,6 @@ static void genStmt(TreeNode * tree) {
       p2 = tree->child[1];
       indicadorLinha++;
       fprintf(listing, "L%d: ", indicadorLinha);
-      cGen(p1);
       linhaWhile[whileCorrente] = indicadorLinha;
       elemento->nome = "lab";
       elemento->op1Flag = 2;
@@ -125,6 +124,7 @@ static void genStmt(TreeNode * tree) {
       elemento->op1Flag = -1;
       elemento->temp = 0;
       elemento->tempFlag = -1;
+      cGen(p1);
       fprintf(listing, "if_false t%d", indiceT-1);
       indicadorLinha++;
       linhaFinalWhile[whileCorrente] = indicadorLinha;

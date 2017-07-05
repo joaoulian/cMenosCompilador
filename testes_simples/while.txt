@@ -1,0 +1,12 @@
+void main(void){
+	int z;
+	int x;
+	int y;
+	y = 0;
+	x = input();
+	while (x == 5){
+        y = y + 5;
+        x = x - 1;
+    }
+    output(y);
+}

@@ -89,7 +89,7 @@ void percorreLista(){
   temp = malloc(sizeof(cel));
   temp2 = malloc(sizeof(cel));
   *temp2 = *f->inicio;
-  if (posMain > 0) contLinha++;
+  if (posMain > 2) contLinha++;
   inicializaFilaParam(par);
   while (temp2 != NULL){
     mapeiaLabel(temp2);
@@ -221,7 +221,11 @@ void mapeiaLabel(cel *temp){
       contLinha++;
     }
   }
-  else if ((strcmp(temp->nome, "eq") == 0)){
+  else if ((strcmp(temp->nome, "eq") == 0) ||
+            strcmp(temp->nome, "meq") == 0 ||
+            strcmp(temp->nome, "leq") == 0 ||
+            strcmp(temp->nome, "mor") == 0 ||
+            strcmp(temp->nome, "les") == 0){
     contLinha = contLinha + 3;
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
@@ -547,7 +551,11 @@ void converteParaMaquina(cel *temp){
       contLinha++;
     }
   }
-  else if ((strcmp(temp->nome, "eq") == 0)){
+  else if ((strcmp(temp->nome, "eq") == 0) ||
+            strcmp(temp->nome, "meq") == 0 ||
+            strcmp(temp->nome, "leq") == 0 ||
+            strcmp(temp->nome, "mor") == 0 ||
+            strcmp(temp->nome, "les") == 0){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     if (temp->op1Flag == 0){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
@@ -573,8 +581,8 @@ void converteParaMaquina(cel *temp){
     }
     contLinha++;
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    converteTipoR(26, reg-2, reg-1, reg);
-    fprintf(listing, "eq $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
+    converteTipoR(geraOpcode(temp->nome), reg-2, reg-1, reg);
+    fprintf(listing, "%s $s%d, $s%d, $s%d\n", temp->nome, reg, reg-1, reg-2);
     contLinha++;
     posTemporario1 = reg;
   }
@@ -714,6 +722,21 @@ int geraOpcode(char * nome){
   }
   else if (strcmp(nome, "sub") == 0){
     return 3;
+  }
+  else if (strcmp(nome, "eq") == 0){
+    return 28;
+  }
+  else if (strcmp(nome, "mor") == 0){
+    return 29;
+  }
+  else if (strcmp(nome, "leq") == 0){
+    return 30;
+  }
+  else if (strcmp(nome, "meq") == 0){
+    return 31;
+  }
+  else if (strcmp(nome, "les") == 0){
+    return 14;
   }
 }
 
