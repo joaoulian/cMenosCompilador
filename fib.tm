@@ -1,4 +1,4 @@
-memoriaDeInstrucoes[1] = {5'd16, 27'd38};
+memoriaDeInstrucoes[1] = {5'd16, 27'd39};
 memoriaDeInstrucoes[2] = {5'd25, 5'd1, 22'd0};
 memoriaDeInstrucoes[3] = {5'd24, 5'd1, 22'd6};
 memoriaDeInstrucoes[4] = {5'd25, 5'd1, 22'd1};
