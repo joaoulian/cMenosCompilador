@@ -23,5 +23,5 @@ void main(void){
   int r;
   n = input();
   r = fibonacci(n);
-  output(n);
+  output(r);
 }

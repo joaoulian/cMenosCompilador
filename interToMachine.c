@@ -588,9 +588,9 @@ void converteParaMaquina(cel *temp){
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    converteTipoE(25, 0, 1);
+    converteTipoE(25, 0, 0);
     contLinha++;
-    fprintf(listing, "li $s0, 1\n");
+    fprintf(listing, "li $s0, 0\n");
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     converteTipoI(12, posTemporario1, 0, linhaLabel[temp->op2Num]);
     fprintf(listing, "beq $s%d, $s0, %d\n", posTemporario1, linhaLabel[temp->op2Num]);
