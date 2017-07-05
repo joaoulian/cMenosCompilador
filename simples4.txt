@@ -1,11 +1,12 @@
-int teste(int y[]){
-    int z;
-    y[2] = 2 + z;
+int teste(int y[], int a){
+    y[2] = 2 + a;
     return 1;
 }
 
 void main(void){
     int r;
+    int b;
     int x[4];
-    r = teste(x);
+    b = 5;
+    r = teste(x, b);
 }

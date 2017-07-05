@@ -155,7 +155,10 @@ int buscaMemoriaComEscopo(char *name, char *escopo){
     if (hashTable[i] != NULL){
       BucketList l = hashTable[i];
       while (l != NULL){
-        if ((strcmp(name,l->name2) == 0) && strcmp(escopo, l->escopo) == 0){
+        if ((strcmp(name,l->name2) == 0) && (strcmp(escopo, l->escopo) == 0)){
+          return l->memloc;
+        }
+        else if (strcmp(name, l->name2) == 0 && (strcmp(l->escopo, "programa") == 0)){
           return l->memloc;
         }
         l = l->next;

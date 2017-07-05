@@ -1,0 +1,35 @@
+int vetor[2];
+int foo(int x, int y, int z, int w){
+    int result;
+    result = 0;
+    while(result >= 0){
+        if(x < 2)
+            result = x + y;
+        if(y > 2)
+            result = result + y + z;
+        else
+            result = result * 3;
+        if(w <= 4){
+            if(z == 0)
+                return 0;
+            if(result != 0)
+                return result/(w - 1);
+        }
+    }
+}
+void main(void){
+    int x;
+    int y;
+    int z;
+    int l;
+    int v;
+    vetor[0] = input();
+    v = vetor[0];
+    y = 1;
+    z = 3;
+    l = 4;
+    x = foo(y, v, z, l);
+    vetor[1] = x;
+    v = vetor[1];
+    output(v);
+}

@@ -397,7 +397,7 @@ static void genExpression(TreeNode * tree) {
          else {
            if (tree != NULL && tree->child[0] != NULL)
             other = tree->child[0];
-           while (other != NULL) {
+            while (other != NULL) {
                auxTipo = buscaTipoComEscopo(other->attr.name, other->escopo);
                temp++;
                if (auxTipo == Variavel) {
@@ -746,11 +746,11 @@ static void genExpression(TreeNode * tree) {
             }
           }
           else if (p2->kind.expression == VariavelK || p2->kind.expression == ConstK) {
-            if (p1 != NULL)
+            if (p1 != NULL){
+              ehVetor = 0;
               cGen(p1);
+            }
             elemento->nome = "asg";
-            elemento->temp = 0;
-            elemento->tempFlag = -1;
             fprintf(listing, " = ");
             if (p2 != NULL)
               cGen(p2);
@@ -790,7 +790,7 @@ static void genExpression(TreeNode * tree) {
               if (p1 != NULL)
                 cGen(p1);
               fprintf(listing, " = ");
-              fprintf(listing, "t%d", indiceT-1);
+              fprintf(listing, "t%d\n", indiceT-1);
               elemento->op2Flag = 3;
               elemento->op2Num = indiceT-1;
               elemento->temp = 0;
@@ -810,7 +810,7 @@ static void genExpression(TreeNode * tree) {
                 elemento->nome = "asg";
                 fprintf(listing, " = ");
                 if (tempAtribuicaoVetor > -1){
-                  fprintf(listing, "t%d", tempAtribuicaoVetor);
+                  fprintf(listing, "t%d\n", tempAtribuicaoVetor);
                 }
                 elemento->temp = tempAtribuicaoVetor;
                 elemento->prox = NULL;
@@ -828,7 +828,7 @@ static void genExpression(TreeNode * tree) {
                   elemento->nome = "asg";
                   fprintf(listing, " = ");
                   if (tempAtribuicaoVetor > -1){
-                    fprintf(listing, "t%d", tempAtribuicaoVetor);
+                    fprintf(listing, "t%d\n", tempAtribuicaoVetor);
                   }
                   elemento->temp = tempAtribuicaoVetor;
                   elemento->tempFlag = 0;

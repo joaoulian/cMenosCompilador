@@ -1,0 +1,39 @@
+void sort(int num[], int tam){
+    int i;
+    int j;
+    int min;
+    int aux;
+    int aux2;
+    int aux3;
+    i = 0;
+    while (i < tam-1){
+        min = i;
+        j = i + 1;
+        while (j < tam){
+            aux2 = num[j];
+            aux3 = num[min];
+            if(aux2 < aux3)
+                min = j;
+            j = j + 1;
+        }
+        if (i != min){
+            aux = num[i];
+            num[i] = num[min];
+            num[min] = aux;
+        }
+        i = i + 1;
+    }
+}
+void main(void){
+    int vetor[4];
+    int i;
+    int j;
+    vetor[0] = 9;
+    vetor[1] = 6;
+    vetor[2] = 8;
+    vetor[3] = 7;
+    j = 4;
+    sort(vetor, j);
+    i = input();
+    output(vetor[i]);
+}
