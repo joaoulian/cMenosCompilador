@@ -73,10 +73,12 @@ paramCel *param;
 int linhaLabel[30];
 int indicePilha = 0;
 int retornoFuncao[200];
+int vetorMapeado[200];
 
 void percorreLista(){
   cel *temp;
   cel *temp2;
+  cel *aux;
   contLinha = 1;
   fun = malloc(sizeof(funFila));
   par = malloc(sizeof(paramFila));
@@ -89,11 +91,12 @@ void percorreLista(){
   posTemporario1 = 4;
   temp = malloc(sizeof(cel));
   temp2 = malloc(sizeof(cel));
-  *temp2 = *f->inicio;
+  aux = malloc(sizeof(cel));
   if (posMain > 2) contLinha++;
+  *temp2 = *f->inicio;
   inicializaFilaParam(par);
   while (temp2 != NULL){
-    mapeiaLabel(temp2);
+    contaVetores(temp2);
     if (temp2->prox == f->fim->prox){
       temp2 = NULL;
     }
@@ -101,9 +104,16 @@ void percorreLista(){
       *temp2 = *temp2->prox;
     }
   }
-  if (numVetores > 0){
-    fun->inicio->posicaoInicio = fun->inicio->posicaoInicio + (numVetores + 1);
-    fun->inicio->posicaoFim = fun->inicio->posicaoFim + (numVetores + 1);
+  *aux = *f->inicio;
+  inicializaFilaParam(par);
+  while (aux != NULL){
+    mapeiaLabel(aux);
+    if (aux->prox == f->fim->prox){
+      aux = NULL;
+    }
+    else {
+      *aux = *aux->prox;
+    }
   }
   contLinha = numVetores + 1;
   if (posMain > 2){
@@ -126,6 +136,34 @@ void percorreLista(){
   fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
   converteTipoT(18);
   fprintf(listing, "hlt\n");
+}
+
+void contaVetores(cel *temp){
+  if (strcmp(temp->nome,"asg") == 0){
+    if (temp->op1Flag == 5 || temp->op2Flag == 5){
+      if (vetorMapeado[temp->op1Num] != 1){
+        reg = 1;
+        numVetores++;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
+        int aux;
+        aux = contLinha;
+        contLinha = numVetores;
+        converteTipoE(25, reg, temp->op1Num);
+        fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
+        contLinha = aux;
+        contLinha++;
+        numVetores++;
+        aux = contLinha;
+        contLinha = numVetores;
+        fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
+        converteTipoE(24, reg, temp->op1Num);
+        contLinha = aux;
+        contLinha++;
+        fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
+        vetorMapeado[temp->op1Num] = 1;
+      }
+    }
+  }
 }
 
 void mapeiaLabel(cel *temp){
@@ -151,34 +189,46 @@ void mapeiaLabel(cel *temp){
       }
     }
   }
-  else if (strcmp(temp->nome, "par") == 0){
-    if (temp->op1Flag == 1){
-      param->tipo = 1;
-      param->valor = temp->op1Num;
-      param->prox = NULL;
-      contLinha = contLinha;
-      insereFilaParam(par, *param);
-    }
-    else if (temp->op1Flag == 5){
-      param->tipo = 5;
-      param->valor = temp->op1Num;
-      param->prox = NULL;
-      contLinha = contLinha;
-      insereFilaParam(par, *param);
-    }
-  }
   else if (strcmp(temp->nome, "cal") == 0){
-    reg = 1;
     int i;
     int hashValue;
-    if (temp->op1Num == 1 || temp->op1Num == 0){
+    if (temp->op1Num == 0){
       contLinha++;
+    }
+    else if (temp->op1Num == 1){
+      int posParam = temp->op1Num;
+      paramCel *aux = malloc(sizeof(paramCel));
+      *aux = *par->inicio;
+      for (i = 0; i < temp->op2Num; i++){
+        if (aux->tipo == 1){
+          contLinha++;
+          aux = aux->prox;
+        }
+        else if (aux->tipo == 5){
+          contLinha++;
+          aux = aux->prox;
+        }
+      }
+      contLinha++;
+      inicializaFilaParam(par);
     }
     else {
       int posParam = temp->op1Num;
+      paramCel *aux = malloc(sizeof(paramCel));
       funCel *tempFun = malloc(sizeof(funCel));
+      *aux = *par->inicio;
+      for (i = 0; i < temp->op2Num; i++){
+        if (aux->tipo == 1){
+          contLinha = contLinha + 2;
+          aux = aux->prox;
+        }
+        else if (aux->tipo == 5){
+          contLinha = contLinha + 2;
+          aux = aux->prox;
+        }
+      }
       tempFun = buscaFilaFunByHash(fun, temp->op1Num);
-      contLinha = contLinha + 3;
+      contLinha = contLinha + 2;
       if (tempFun->hash > -1){
         contLinha++;
       }
@@ -188,37 +238,57 @@ void mapeiaLabel(cel *temp){
       else {
         retornoFuncao[temp->temp] = 0;
       }
+      inicializaFilaParam(par);
     }
+  }
+  else if (strcmp(temp->nome, "par") == 0){
+    if (temp->op1Flag == 1){
+      param->tipo = 1;
+      param->valor = temp->op1Num;
+      param->prox = NULL;
+      insereFilaParam(par, *param);
+    }
+    else if (temp->op1Flag == 5){
+      param->tipo = 5;
+      param->valor = temp->op1Num;
+      param->prox = NULL;
+      insereFilaParam(par, *param);
+    }
+  }
+  else if (strcmp(temp->nome, "ret") == 0){
+    contLinha++;
   }
   else if (strcmp(temp->nome, "got") == 0){
     contLinha++;
   }
   else if (strcmp(temp->nome,"asg") == 0){
-    if (temp->op1Flag == 5){
-      reg = 1;
-      numVetores++;
-      fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
-      int aux;
-      aux = contLinha;
-      contLinha = numVetores;
-      converteTipoE(25, reg, temp->op1Num);
-      fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
-      contLinha = aux;
+    if (temp->op1Flag == 5){ // vetor recebe
       contLinha++;
-      numVetores++;
-      aux = contLinha;
-      contLinha = numVetores;
-      fprintf(listing, "memoriaDeInstrucoes[%d] = ", numVetores);
-      converteTipoE(24, reg, temp->op1Num);
-      contLinha = aux;
-      fprintf(listing, "sw $s%d, %d\n", reg, temp->op1Num);
-      contLinha++;
-      contLinha = contLinha + 3;
+      if (temp->op2Flag == 1){
+        contLinha = contLinha + 2;
+      }
+      else if (temp->op2Flag == 0){
+        contLinha = contLinha + 2;
+      }
+      if (temp->tempFlag == 0){
+        contLinha++;
+      }
+      else {
+        contLinha = contLinha + 2;
+      }
     }
-    if (temp->op2Flag == 0 || temp->op2Flag == 1){
-      contLinha = contLinha + 2;
+    else if (temp->op1Flag == 3){ // temporario recebe
+      if (temp->op2Flag == 5){
+        contLinha = contLinha + 4;
+      }
     }
-    else if (temp->op2Flag == 3){
+    else if (temp->op1Flag == 1){ // variavel recebe
+      if (temp->op2Flag == 0){
+        contLinha++;
+      }
+      else if (temp->op2Flag == 1){
+        contLinha++;
+      }
       contLinha++;
     }
   }
@@ -226,8 +296,23 @@ void mapeiaLabel(cel *temp){
             strcmp(temp->nome, "meq") == 0 ||
             strcmp(temp->nome, "leq") == 0 ||
             strcmp(temp->nome, "mor") == 0 ||
-            strcmp(temp->nome, "les") == 0){
-    contLinha = contLinha + 3;
+            strcmp(temp->nome, "les") == 0 ||
+            strcmp(temp->nome, "neq") == 0){
+    if (temp->op1Flag == 0){
+      contLinha++;
+    }
+    else if (temp->op1Flag == 1){
+      contLinha++;
+    }
+    if (temp->op2Flag != 3){
+      if (temp->op2Flag == 0){
+        contLinha++;
+      }
+      else if (temp->op2Flag == 1){
+        contLinha++;
+      }
+    }
+    contLinha++;
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
     contLinha = contLinha + 2;
@@ -251,13 +336,14 @@ void mapeiaLabel(cel *temp){
       }
     }
     else if (temp->op1Flag == 4){
-      contLinha = contLinha + 2;
+      contLinha++;
       if (temp->op2Flag == 0){
         contLinha++;
       }
       else if (temp->op2Flag == 4){
         contLinha++;
       }
+      contLinha++;
       if (temp->temp > 0){
         contLinha++;
       }
@@ -285,6 +371,7 @@ void mapeiaLabel(cel *temp){
 
 void converteParaMaquina(cel *temp){
   reg = 1;
+  //fprintf(listing, "%s %d %d %d linha: %d\n", temp->nome, temp->op1Flag, temp->op2Flag, temp->temp, contLinha );
   if (strcmp(temp->nome,"lab") == 0){
     if(temp->op1Flag != 2){
         if (ultimaFuncao == -1){
@@ -361,7 +448,7 @@ void converteParaMaquina(cel *temp){
           contLinha++;
           aux = aux->prox;
         }
-        if (aux->tipo == 5){
+        else if (aux->tipo == 5){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
           converteTipoE(25, reg, aux->valor);
           fprintf(listing, "li $s%d, %d\n", reg, aux->valor);
@@ -395,7 +482,6 @@ void converteParaMaquina(cel *temp){
       else {
         recebeRetorno = 0;
       }
-
       inicializaFilaParam(par);
     }
   }
@@ -507,15 +593,10 @@ void converteParaMaquina(cel *temp){
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;
-        if (temp->tempFlag == 1){
+        if (temp->tempFlag == 1 || temp->tempFlag == 2){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
           converteTipoE(23, reg, temp->temp);
           fprintf(listing, "lw $s%d, %d\n", reg, temp->temp);
-        }
-        else if (temp->tempFlag == 2){
-          fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-          converteTipoE(25, reg, temp->temp);
-          fprintf(listing, "li $s%d, %d\n", reg, temp->temp);
         }
         contLinha++;
         reg++;
@@ -563,26 +644,28 @@ void converteParaMaquina(cel *temp){
       fprintf(listing, "li $s%d, %d\n", reg, temp->op1Num);
       converteTipoE(25, reg, temp->op1Num);
       reg++;
+      contLinha++;
     }
     else if (temp->op1Flag == 1){
       converteTipoE(23, reg, temp->op1Num);
       fprintf(listing, "lw $s%d, %d\n", reg, temp->op1Num);
       reg++;
+      contLinha++;
     }
-    contLinha++;
     if (temp->op2Flag != 3){
       fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
       if (temp->op2Flag == 0){
         fprintf(listing, "li $s%d, %d\n", reg, temp->op2Num);
         converteTipoE(25, reg, temp->op2Num);
         posTemporario1 = reg;
+        contLinha++;
       }
       else if (temp->op2Flag == 1){
         converteTipoE(23, reg, temp->op2Num);
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         posTemporario1 = reg;
+        contLinha++;
       }
-      contLinha++;
     }
     reg++;
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
