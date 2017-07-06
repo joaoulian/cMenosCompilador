@@ -1,18 +1,27 @@
-void sort(int num[], int tam){
+void main(void){
+    int num[4];
     int i;
     int j;
     int k;
+    int display; 
+    int leitura;
     int min;
     int aux;
     int aux2;
     int aux3;
+    int tam;
+    tam = 4;
+    num[0] = 9;
+    num[1] = 6;
+    num[2] = 8;
+    num[3] = 7;
     i = 0;
-    k = tam-1;
+    k = 3;
+    output(k);
     while (i < k){
-	output(i);
         min = i;
         j = i + 1;
-        while (j < tam){
+        while (j < 4){
             aux2 = num[j];
             aux3 = num[min];
             if(aux2 < aux3)
@@ -26,19 +35,6 @@ void sort(int num[], int tam){
         }
         i = i + 1;
     }
-}
-void main(void){
-    int vetor[4];
-    int i;
-    int j;
-    int display;
-    vetor[0] = 9;
-    vetor[1] = 6;
-    vetor[2] = 8;
-    vetor[3] = 7;
-    j = 4;
-    sort(vetor, j);
-    i = input();
-    display = vetor[i];
+    display = num[3];
     output(display);
 }
