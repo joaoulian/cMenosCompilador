@@ -1,9 +1,4 @@
+int v[4];
 void main(void){
-	int z;
-	int x;
-	int y;
-	y = 0;
-	x = 5;
-    z = x + y;
-    output(z);
+	v[1] = input();
 }

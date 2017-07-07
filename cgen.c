@@ -670,6 +670,7 @@ static void genExpression(TreeNode * tree) {
               elemento->op1Flag = 5;
               elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo);
               fprintf(listing, "%s[", tree->attr.name);
+              elemento->op2Flag = -1;
               if (tree->child[0] != NULL)
                 cGen(tree->child[0]);
               fprintf(listing, "]");
@@ -763,23 +764,42 @@ static void genExpression(TreeNode * tree) {
             verificaCall = 2;
             if (p2 != NULL)
               cGen(p2);
-            if (p1 != NULL)
-              cGen(p1);
-            elemento->nome = "asg";
-            elemento->op2Flag = 3;
-            elemento->op2Num = indiceT-1;
-            elemento->prox = NULL;
-            elemento->temp = 0;
-            elemento->tempFlag = -1;
-            insereFila(f, *elemento);
-            elemento->temp = 0;
-            elemento->tempFlag = -1;
-            elemento->op2Flag = -1;
-            elemento->op1Flag = -1;
-            fprintf(listing, " = t%d", indiceT-1);
-            indiceT++;
-            fprintf(listing, "\n");
-            verificaCall = 0;
+            if (p1->kind.expression == VetorK){
+              if (p1 != NULL)
+                cGen(p1);
+              elemento->nome = "asg";
+              elemento->tempFlag = 0;
+              elemento->temp = indiceT-1;
+              elemento->prox = NULL;
+              insereFila(f, *elemento);
+              elemento->temp = 0;
+              elemento->tempFlag = -1;
+              elemento->op2Flag = -1;
+              elemento->op1Flag = -1;
+              fprintf(listing, " = t%d", indiceT-1);
+              indiceT++;
+              fprintf(listing, "\n");
+              verificaCall = 0;
+            }
+            else {
+              if (p1 != NULL)
+                cGen(p1);
+              elemento->nome = "asg";
+              elemento->op2Flag = 3;
+              elemento->op2Num = indiceT-1;
+              elemento->prox = NULL;
+              elemento->temp = 0;
+              elemento->tempFlag = -1;
+              insereFila(f, *elemento);
+              elemento->temp = 0;
+              elemento->tempFlag = -1;
+              elemento->op2Flag = -1;
+              elemento->op1Flag = -1;
+              fprintf(listing, " = t%d", indiceT-1);
+              indiceT++;
+              fprintf(listing, "\n");
+              verificaCall = 0;
+            }
           }
           else if (p2->kind.expression == VetorK) {
             if (p1->kind.expression == VariavelK) {

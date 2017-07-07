@@ -1,40 +1,12 @@
 void main(void){
     int num[4];
     int i;
-    int j;
-    int k;
-    int display; 
-    int leitura;
-    int min;
-    int aux;
-    int aux2;
-    int aux3;
-    int tam;
-    tam = 4;
-    num[0] = 9;
-    num[1] = 6;
-    num[2] = 8;
-    num[3] = 7;
-    i = 0;
-    k = 3;
-    output(k);
-    while (i < k){
-        min = i;
-        j = i + 1;
-        while (j < 4){
-            aux2 = num[j];
-            aux3 = num[min];
-            if(aux2 < aux3)
-                min = j;
-            j = j + 1;
-        }
-        if (i != min){
-            aux = num[i];
-            num[i] = num[min];
-            num[min] = aux;
-        }
-        i = i + 1;
-    }
-    display = num[3];
-    output(display);
+    int v;
+    i = input();
+    num[0] = 1;
+    num[1] = 3;
+    num[2] = 4;
+    num[3] = 5;
+    v = num[i];
+    output(v);
 }

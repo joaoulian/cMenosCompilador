@@ -560,7 +560,6 @@ void converteParaMaquina(cel *temp){
     fprintf(listing, "jr $s31\n");
     indicePilha++;
     contLinha++;
-    ultimaFuncao = temp->op1Num;
   }
   else if (strcmp(temp->nome, "got") == 0){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
@@ -751,10 +750,15 @@ void converteParaMaquina(cel *temp){
   }
   else if ((strcmp(temp->nome, "if_f") == 0)){
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-    converteTipoE(25, 0, 0);
-    contLinha++;
-    if (neq == 1) fprintf(listing, "li $s0, 1\n");
-    else fprintf(listing, "li $s0, 0\n");
+    if (neq == 1){
+      converteTipoE(25, 0, 1);
+      fprintf(listing, "li $s0, 1\n");
+    }
+    else{
+      converteTipoE(25, 0, 0);
+      fprintf(listing, "li $s0, 0\n");
+    }
+        contLinha++;
     fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
     converteTipoI(12, posTemporario1, 0, linhaLabel[temp->op2Num]);
     fprintf(listing, "beq $s%d, $s0, %d\n", posTemporario1, linhaLabel[temp->op2Num]);
