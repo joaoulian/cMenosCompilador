@@ -629,7 +629,7 @@ void converteParaMaquina(cel *temp){
     else if (temp->op1Flag == 3){ // temporario recebe
       if (temp->op2Flag == 5){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoE(25, reg, temp->op2Num);
+        converteTipoE(23, reg, temp->op2Num);
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;
@@ -640,7 +640,7 @@ void converteParaMaquina(cel *temp){
         }
         else if (temp->tempFlag == 2){
           fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-          converteTipoE(23, reg, temp->temp);
+          converteTipoE(25, reg, temp->temp);
           fprintf(listing, "li $s%d, %d\n", reg, temp->temp);
         }
         contLinha++;
@@ -674,7 +674,7 @@ void converteParaMaquina(cel *temp){
       }
       if (temp->op2Flag == 5){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
-        converteTipoE(25, reg, temp->op2Num);
+        converteTipoE(23, reg, temp->op2Num);
         fprintf(listing, "lw $s%d, %d\n", reg, temp->op2Num);
         contLinha++;
         reg++;

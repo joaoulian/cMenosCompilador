@@ -659,6 +659,7 @@ static void genExpression(TreeNode * tree) {
               fprintf(listing, "%s[", tree->attr.name);
               if (tree->child[0] != NULL)
                 cGen(tree->child[0]);
+              elemento->temp = elemento->temp + 1;
               fprintf(listing, "]");
               insereFila(f, *elemento);
               fprintf(listing, "\n");
@@ -674,6 +675,7 @@ static void genExpression(TreeNode * tree) {
               if (tree->child[0] != NULL)
                 cGen(tree->child[0]);
               fprintf(listing, "]");
+              elemento->op2Num = elemento->op2Num + 1;
             }
           }
           /*else {
