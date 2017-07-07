@@ -596,6 +596,7 @@ void converteParaMaquina(cel *temp){
         fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
         contLinha++;
       }
+      if (reg == 3) posTemporario1 = 4;
       if (temp->tempFlag == 0){
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
         if (retornoFuncao[temp->temp] == 1){
@@ -606,6 +607,7 @@ void converteParaMaquina(cel *temp){
           converteTipoI(15, posTemporario1, reg, 0);
           fprintf(listing, "sr $s%d, $s%d\n", posTemporario1, reg);
         }
+        if (posTemporario1 == 4) posTemporario1 = 3;
         contLinha++;
       }
       else {
@@ -649,6 +651,7 @@ void converteParaMaquina(cel *temp){
         converteTipoR(1, reg-2, reg-1, reg);
         fprintf(listing, "sum $s%d, $s%d, $s%d\n", reg, reg-1, reg-2);
         contLinha++;
+        if (posTemporario1 == 3) posTemporario1 = 4;
         fprintf(listing, "memoriaDeInstrucoes[%d] = ", contLinha);
         converteTipoI(26, posTemporario1, reg, 0);
         fprintf(listing, "lr $s%d, $s%d\n", posTemporario1, reg);

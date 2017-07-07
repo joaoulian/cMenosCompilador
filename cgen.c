@@ -646,7 +646,37 @@ static void genExpression(TreeNode * tree) {
               fprintf(listing, "\n");
             }
           }
-          else if (tree->child[0]->kind.expression == VariavelK || tree->child[0]->kind.expression == ConstK){
+          else if (tree->child[0]->kind.expression == VariavelK){
+            if (ehVetor == 2){
+              fprintf(listing, "t%d = ", indiceT);
+              elemento->nome = "asg";
+              elemento->op1Flag = 3;
+              elemento->op1Num = indiceT;
+              tempAtribuicaoVetor = indiceT;
+              indiceT++;
+              elemento->op2Flag = 5;
+              elemento->op2Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo);
+              fprintf(listing, "%s[", tree->attr.name);
+              if (tree->child[0] != NULL)
+                cGen(tree->child[0]);
+              fprintf(listing, "]");
+              insereFila(f, *elemento);
+              fprintf(listing, "\n");
+              elemento->op1Flag = -1;
+              elemento->op2Flag = -1;
+              elemento->tempFlag = -1;
+            }
+            else {
+              elemento->op1Flag = 5;
+              elemento->op1Num = buscaMemoriaComEscopo(tree->attr.name, tree->escopo);
+              fprintf(listing, "%s[", tree->attr.name);
+              elemento->op2Flag = -1;
+              if (tree->child[0] != NULL)
+                cGen(tree->child[0]);
+              fprintf(listing, "]");
+            }
+          }
+          else if (tree->child[0]->kind.expression == ConstK){
             if (ehVetor == 2){
               fprintf(listing, "t%d = ", indiceT);
               elemento->nome = "asg";

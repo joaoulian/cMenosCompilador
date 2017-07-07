@@ -9,14 +9,14 @@ void sort(int num[], int tam){
     i = 0;
     k = tam-1;
     while (i < k){
-	output(i);
         min = i;
         j = i + 1;
         while (j < tam){
             aux2 = num[j];
             aux3 = num[min];
-            if(aux2 < aux3)
+            if(aux2 < aux3){
                 min = j;
+	    }
             j = j + 1;
         }
         if (i != min){
@@ -29,7 +29,7 @@ void sort(int num[], int tam){
 }
 void main(void){
     int vetor[4];
-    int i;
+    int m;
     int j;
     int display;
     vetor[0] = 9;
@@ -38,7 +38,7 @@ void main(void){
     vetor[3] = 7;
     j = 4;
     sort(vetor, j);
-    i = input();
-    display = vetor[i];
+    m = input();
+    display = vetor[m];
     output(display);
 }
