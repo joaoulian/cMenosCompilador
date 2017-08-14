@@ -1,0 +1,31 @@
+int buscaSequencial(int v[], int tam, int buscado){
+  int i;
+  int aux;
+  i = 1;
+  while (i <= tam){
+    aux = v[i];
+    if (aux == buscado){
+      aux = 1;
+      return aux;
+    }
+    i = i + 1;
+  }
+  aux = 0;
+  return aux;
+}
+
+void main(void){
+  int vetor[5];
+  int t;
+  int tamanho;
+  int resposta;
+  vetor[1] = 2;
+  vetor[2] = 5;
+  vetor[3] = 10;
+  vetor[4] = 1;
+  vetor[5] = 13;
+  tamanho = 5;
+  t = input();
+  resposta = buscaSequencial(vetor, tamanho, t);
+  output(resposta); 
+}

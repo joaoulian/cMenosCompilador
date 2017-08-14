@@ -1,0 +1,19 @@
+int fatorial(int n){
+  int i;
+  int aux;
+  i = n - 1;
+  aux = n;
+  while (i > 0){
+    aux = aux * i;
+    i = i - 1;
+  } 
+  return aux;
+}
+
+void main(void){
+  int num;
+  int fat;
+  num = input();
+  fat = fatorial(num);
+  output(fat); 
+}

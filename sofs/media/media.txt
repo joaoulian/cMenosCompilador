@@ -1,0 +1,28 @@
+int mediaVetor(int v[], int tam){
+  int i;
+  int soma;
+  int media;
+  i = 1;
+  soma = 0;
+  while (i <= tam){
+    soma = soma + v[i];
+    i = i + 1;
+  }
+  media = soma / tam;
+  return media;
+}
+
+void main(void){
+  int vetor[5];
+  int t;
+  int tamanho;
+  int resposta;
+  vetor[1] = 2;
+  vetor[2] = 5;
+  vetor[3] = 10;
+  vetor[4] = 1;
+  vetor[5] = 13;
+  tamanho = 5;
+  resposta = mediaVetor(vetor, tamanho);
+  output(resposta); 
+}

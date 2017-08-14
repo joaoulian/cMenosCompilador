@@ -1,0 +1,33 @@
+int buscaBinaria(int v[], int tam, int buscado){
+  int e;
+  int d;
+  int m;
+  int aux;
+  e = 1;
+  d = tam;
+  while (e <= d){
+    m = (e + d) / 2;
+    aux = v[m];
+    if (aux == buscado) return 1;
+    if (aux < buscado) e = m + 1;
+    else d = m - 1;
+  }
+  aux = 0;
+  return 0;
+}
+
+void main(void){
+  int vetor[5];
+  int t;
+  int tamanho;
+  int resposta;
+  vetor[1] = 2;
+  vetor[2] = 3;
+  vetor[3] = 7;
+  vetor[4] = 8;
+  vetor[5] = 16;
+  tamanho = 5;
+  t = input();
+  resposta = buscaBinaria(vetor, tamanho, t);
+  output(resposta); 
+}

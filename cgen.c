@@ -395,178 +395,195 @@ static void genExpression(TreeNode * tree) {
            indiceT++;
          }
          else {
-           if (tree != NULL && tree->child[0] != NULL)
+           if (tree != NULL && tree->child[0] != NULL){
             other = tree->child[0];
             while (other != NULL) {
-               auxTipo = buscaTipoComEscopo(other->attr.name, other->escopo);
-               temp++;
-               if (auxTipo == Variavel) {
-                 fprintf(listing, "param: ");
-                 elemento->nome = "par";
-                 elemento->op1Flag = 1;
-                 elemento->op1Num = buscaMemoriaComEscopo(other->attr.name, other->escopo);
-                 elemento->op2Flag = -1;
-                 elemento->op2Num = 0;
-                 elemento->prox = NULL;
-                 elemento->temp = 0;
-                 elemento->tempFlag = -1;
-                 insereFila(f, *elemento);
-                 elemento->op1Flag = -1;
-                 fprintf(listing, "%s ", other->attr.name);
-               }
-               else if (auxTipo == Vetor){
-                 fprintf(listing, "param: ");
-                 elemento->nome = "par";
-                 elemento->op1Flag = 5;
-                 elemento->op1Num = buscaMemoriaComEscopo(other->attr.name, other->escopo);
-                 elemento->op2Flag = -1;
-                 elemento->op2Num = 0;
-                 elemento->prox = NULL;
-                 elemento->temp = 0;
-                 elemento->tempFlag = -1;
-                 insereFila(f, *elemento);
-                 elemento->op1Flag = -1;
-                 fprintf(listing, "%s ", other->attr.name);
-               }
-             if (other->kind.expression == CallK) {
-               verificaCall = 3;
-               cGen(other);
-               TreeNode * a;
-               int b = 0;
-               a = other;
-               while (a != NULL) {
-                 b++;
-                 a = a->sibling;
-               }
-               fprintf(listing, "param: t%d\n", indiceT);
-               fprintf(listing, "call %s, %d\n", tree->attr.name, b);
-               verificaCall = 1;
-               indiceT++;
-             } else if (other->kind.expression == OpK) {
-               p1 = other->child[0];
-               p2 = other->child[1];
-               if (p1 != NULL && p2 != NULL) {
-                 if (p1->kind.expression == ConstK) {
-                   fprintf(listing, "t%d = ", indiceT);
-                   elemento->temp = indiceT;
-                   indiceT++;
-                   if (p1 != NULL) {
-                     cGen(p1);
-                   }
-                   showOp(other->attr.op);
-                   if (p2 != NULL){
-                     cGen(p2);
-                   }
-                   elemento->prox = NULL;
-                   insereFila(f, *elemento);
-                   elemento->op1Flag = -1;
-                   elemento->op2Flag = -1;
-                   elemento->temp = 0;
-                   elemento->tempFlag = -1;
-                   fprintf(listing, "\n");
-                 }
-                 if (p1->kind.expression != VariavelK && p1->kind.expression != VetorK && p1->kind.expression != CallK && p1->kind.expression != ConstK) {
-                   if (p1 != NULL) {
-                     cGen(p1);
-                   }
-                   else {
-                     indiceT++;
-                     fprintf(listing, "t%d = ", indiceT);
-                   }
-                   if (p2->kind.expression != VariavelK && p2->kind.expression != VetorK && p1->kind.expression != CallK) {
-                     if (p2 != NULL)
-                       cGen(p2);
-                     fprintf(listing, "t%d = ", indiceT);
-                     elemento->temp = indiceT;
-                     fprintf(listing, "t%d", indiceT-1);
-                     elemento->op1Flag = 3;
-                     elemento->op1Num = indiceT-1;
-                     showOp(other->attr.op);
-                     elemento->op2Flag = 3;
-                     elemento->op2Num = indiceT-2;
-                     elemento->prox = NULL;
-                     insereFila(f, *elemento);
-                     elemento->op1Flag = -1;
-                     elemento->op2Flag = -1;
-                     elemento->temp = 0;
-                     elemento->tempFlag = -1;
-                     fprintf(listing, "t%d", indiceT-2);
-                     indiceT++;
-                   } else if (p2->kind.expression == VariavelK) {
-                     fprintf(listing, "\nt%d = ", indiceT);
-                     elemento->temp = indiceT;
-                     fprintf(listing, "t%d", indiceT-1);
-                     elemento->op1Flag = 3;
-                     elemento->op1Num = indiceT-1;
-                     showOp(other->attr.op);
-                     indiceT++;
-                     if (p2 != NULL)
-                       cGen(p2);
-                     elemento->prox = NULL;
-                     insereFila(f, *elemento);
-                     elemento->op1Flag = -1;
-                     elemento->op2Flag = -1;
-                     elemento->temp = 0;
-                     elemento->tempFlag = -1;
-                     fprintf(listing, "\n");
-                   }
-                 } else if (p1->kind.expression == VariavelK) {
-                   if (p2->kind.expression != VetorK && p1->kind.expression != CallK && p2->kind.expression != OpK) {
-                     fprintf(listing, "t%d = ", indiceT);
-                     elemento->temp = indiceT;
-                     if (p1 != NULL){
-                       cGen(p1);
-                     }
-                     showOp(other->attr.op);
-                     indiceT++;
-                     if (p2 != NULL){
-                       cGen(p2);
-                     }
-                     elemento->prox = NULL;
-                     insereFila(f, *elemento);
-                     elemento->op1Flag = -1;
-                     elemento->op2Flag = -1;
-                     elemento->temp = 0;
-                     elemento->tempFlag = -1;
-                     fprintf(listing, "\n");
-                   }
-                   if (p2->kind.expression == OpK){
-                       if (p2 != NULL)
+              if (other->kind.expression == CallK) {
+                verificaCall = 3;
+                cGen(other);
+                TreeNode * a;
+                int b = 0;
+                a = other;
+                while (a != NULL) {
+                  b++;
+                  a = a->sibling;
+                }
+                fprintf(listing, "param: t%d\n", indiceT);
+                fprintf(listing, "call %s, %d\n", tree->attr.name, b);
+                verificaCall = 1;
+                indiceT++;
+              } else if (other->kind.expression == OpK) {
+                p1 = other->child[0];
+                p2 = other->child[1];
+                if (p1 != NULL && p2 != NULL) {
+                  if (p1->kind.expression == ConstK) {
+                    fprintf(listing, "t%d = ", indiceT);
+                    elemento->temp = indiceT;
+                    indiceT++;
+                    if (p1 != NULL) {
+                      cGen(p1);
+                    }
+                    showOp(other->attr.op);
+                    if (p2 != NULL){
+                      cGen(p2);
+                    }
+                    elemento->prox = NULL;
+                    insereFila(f, *elemento);
+                    elemento->op1Flag = -1;
+                    elemento->op2Flag = -1;
+                    elemento->temp = 0;
+                    elemento->tempFlag = -1;
+                    fprintf(listing, "\n");
+                  }
+                  if (p1->kind.expression != VariavelK && p1->kind.expression != VetorK && p1->kind.expression != CallK && p1->kind.expression != ConstK) {
+                    if (p1 != NULL) {
+                      cGen(p1);
+                    }
+                    else {
+                      indiceT++;
+                      fprintf(listing, "t%d = ", indiceT);
+                    }
+                    if (p2->kind.expression != VariavelK && p2->kind.expression != VetorK && p1->kind.expression != CallK) {
+                      if (p2 != NULL)
                         cGen(p2);
-                       fprintf(listing, "t%d = ", indiceT);
-                       elemento->temp = indiceT;
-                       if (p1 != NULL)
-                         cGen(p1);
-                       showOp(other->attr.op);
-                       fprintf(listing, "t%d", indiceT-1);
-                       elemento->op2Flag = 3;
-                       elemento->op2Num = indiceT-1;
-                       elemento->prox = NULL;
-                       insereFila(f, *elemento);
-                       elemento->op2Flag = -1;
-                       elemento->op1Flag = -1;
-                       elemento->temp = 0;
-                       elemento->tempFlag = -1;
-                       indiceT++;
-                       fprintf(listing, "\n");
-                   }
-                 }
-               }
-               fprintf(listing, "param: t%d", indiceT-1);
-               elemento->nome = "par";
-               elemento->op1Flag = 3;
-               elemento->op1Num  = indiceT - 1;
-               elemento->op2Flag = -1;
-               elemento->op2Num = 0;
-               elemento->temp = 0;
-               elemento->tempFlag = -1;
-               elemento->prox = NULL;
-               insereFila(f, *elemento);
-               elemento->temp = 0;
-               elemento->tempFlag = -1;
-               elemento->op2Flag = -1;
-               elemento->op1Flag = -1;
-             }
+                      fprintf(listing, "t%d = ", indiceT);
+                      elemento->temp = indiceT;
+                      fprintf(listing, "t%d", indiceT-1);
+                      elemento->op1Flag = 3;
+                      elemento->op1Num = indiceT-1;
+                      showOp(other->attr.op);
+                      elemento->op2Flag = 3;
+                      elemento->op2Num = indiceT-2;
+                      elemento->prox = NULL;
+                      insereFila(f, *elemento);
+                      elemento->op1Flag = -1;
+                      elemento->op2Flag = -1;
+                      elemento->temp = 0;
+                      elemento->tempFlag = -1;
+                      fprintf(listing, "t%d", indiceT-2);
+                      indiceT++;
+                    } else if (p2->kind.expression == VariavelK) {
+                      fprintf(listing, "\nt%d = ", indiceT);
+                      elemento->temp = indiceT;
+                      fprintf(listing, "t%d", indiceT-1);
+                      elemento->op1Flag = 3;
+                      elemento->op1Num = indiceT-1;
+                      showOp(other->attr.op);
+                      indiceT++;
+                      if (p2 != NULL)
+                        cGen(p2);
+                      elemento->prox = NULL;
+                      insereFila(f, *elemento);
+                      elemento->op1Flag = -1;
+                      elemento->op2Flag = -1;
+                      elemento->temp = 0;
+                      elemento->tempFlag = -1;
+                      fprintf(listing, "\n");
+                    }
+                  } else if (p1->kind.expression == VariavelK) {
+                    if (p2->kind.expression != VetorK && p1->kind.expression != CallK && p2->kind.expression != OpK) {
+                      fprintf(listing, "t%d = ", indiceT);
+                      elemento->temp = indiceT;
+                      if (p1 != NULL){
+                        cGen(p1);
+                      }
+                      showOp(other->attr.op);
+                      indiceT++;
+                      if (p2 != NULL){
+                        cGen(p2);
+                      }
+                      elemento->prox = NULL;
+                      insereFila(f, *elemento);
+                      elemento->op1Flag = -1;
+                      elemento->op2Flag = -1;
+                      elemento->temp = 0;
+                      elemento->tempFlag = -1;
+                      fprintf(listing, "\n");
+                    }
+                    if (p2->kind.expression == OpK){
+                        if (p2 != NULL)
+                         cGen(p2);
+                        fprintf(listing, "t%d = ", indiceT);
+                        elemento->temp = indiceT;
+                        if (p1 != NULL)
+                          cGen(p1);
+                        showOp(other->attr.op);
+                        fprintf(listing, "t%d", indiceT-1);
+                        elemento->op2Flag = 3;
+                        elemento->op2Num = indiceT-1;
+                        elemento->prox = NULL;
+                        insereFila(f, *elemento);
+                        elemento->op2Flag = -1;
+                        elemento->op1Flag = -1;
+                        elemento->temp = 0;
+                        elemento->tempFlag = -1;
+                        indiceT++;
+                        fprintf(listing, "\n");
+                    }
+                  }
+                }
+                fprintf(listing, "param: t%d", indiceT-1);
+                elemento->nome = "par";
+                elemento->op1Flag = 3;
+                elemento->op1Num  = indiceT - 1;
+                elemento->op2Flag = -1;
+                elemento->op2Num = 0;
+                elemento->temp = 0;
+                elemento->tempFlag = -1;
+                elemento->prox = NULL;
+                insereFila(f, *elemento);
+                elemento->temp = 0;
+                elemento->tempFlag = -1;
+                elemento->op2Flag = -1;
+                elemento->op1Flag = -1;
+              }
+              else if (other->kind.expression == ConstK){
+                temp++;
+                fprintf(listing, "param: ");
+                elemento->nome = "par";
+                elemento->op1Flag = 1;
+                elemento->op1Num = other->attr.val;
+                elemento->op2Flag = -1;
+                elemento->op2Num = 0;
+                elemento->prox = NULL;
+                elemento->temp = 0;
+                elemento->tempFlag = -1;
+                insereFila(f, *elemento);
+                elemento->op1Flag = -1;
+                fprintf(listing, "%d ", other->attr.val);
+              }
+              else {
+                auxTipo = buscaTipoComEscopo(other->attr.name, other->escopo);
+                temp++;
+                if (auxTipo == Variavel) {
+                  fprintf(listing, "param: ");
+                  elemento->nome = "par";
+                  elemento->op1Flag = 1;
+                  elemento->op1Num = buscaMemoriaComEscopo(other->attr.name, other->escopo);
+                  elemento->op2Flag = -1;
+                  elemento->op2Num = 0;
+                  elemento->prox = NULL;
+                  elemento->temp = 0;
+                  elemento->tempFlag = -1;
+                  insereFila(f, *elemento);
+                  elemento->op1Flag = -1;
+                  fprintf(listing, "%s ", other->attr.name);
+                }
+                else if (auxTipo == Vetor){
+                  fprintf(listing, "param: ");
+                  elemento->nome = "par";
+                  elemento->op1Flag = 5;
+                  elemento->op1Num = buscaMemoriaComEscopo(other->attr.name, other->escopo);
+                  elemento->op2Flag = -1;
+                  elemento->op2Num = 0;
+                  elemento->prox = NULL;
+                  elemento->temp = 0;
+                  elemento->tempFlag = -1;
+                  insereFila(f, *elemento);
+                  elemento->op1Flag = -1;
+                  fprintf(listing, "%s ", other->attr.name);
+                }
+              }
              fprintf(listing, "\n");
              other = other->sibling;
            }
@@ -606,6 +623,7 @@ static void genExpression(TreeNode * tree) {
 
            verificaCall = 0;
          }
+       }
          break;
       //[FIM] Gera chamada de função
 
@@ -705,7 +723,7 @@ static void genExpression(TreeNode * tree) {
               if (tree->child[0] != NULL)
                 cGen(tree->child[0]);
               fprintf(listing, "]");
-              elemento->op2Num = elemento->op2Num + 1;
+              elemento->op2Num = elemento->op2Num;
             }
           }
           /*else {

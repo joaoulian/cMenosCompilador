@@ -1,0 +1,28 @@
+int maior(int v[], int tamanho){
+    int aux;
+    int i;
+    int aux2;
+    i = 1;
+    aux = 0;
+    while (i <= tamanho){
+        aux2 = v[i];
+        if (aux2 > aux){
+            aux = aux2;
+        }
+        i = i + 1;
+    }
+    return aux;
+}
+
+void main(void){
+    int v[4];
+    int b;
+    int tam;
+    v[0] = 1;
+    v[1] = 5;
+    v[2] = 3;
+    v[3] = 7;
+    tam = 4;
+    b = maior(v, tam);
+    output(b);
+}
